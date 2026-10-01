@@ -1,0 +1,10 @@
+.drop {
+  flex: 1; display: grid; place-items: center; padding: 24px; cursor: pointer;
+  background: conic-gradient(var(--tint) 25%, var(--tint-strong) 0 50%, var(--tint) 0 75%, var(--tint-strong) 0) 0 0 / 32px 32px;
+  clip-path: polygon(0 16px, 16px 16px, 16px 0, calc(100% - 16px) 0, calc(100% - 16px) 16px, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 16px calc(100% - 16px), 0 calc(100% - 16px));
+}
+.drop__card {
+  display: grid; gap: 12px; justify-items: center; max-width: 20rem; padding: 24px;
+  text-align: center; background: var(--bg); border-radius: var(--radius);
+}
+.drop__title { font-size: 1.5rem; letter-spacing: -0.02em; }

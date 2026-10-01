@@ -1,0 +1,22 @@
+/* Only --bg and --fg change between light and dark. Every other color is a
+   tint (accent + bg), tone (accent + gray) or shade (accent + black) of them. */
+:root {
+  --bg: #fff;
+  --fg: #000;
+  --accent: #1f9d6b;
+  --on-accent: #fff;
+  --tint: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  --tint-strong: color-mix(in srgb, var(--accent) 30%, var(--bg));
+  --tone: color-mix(in srgb, var(--accent) 15%, color-mix(in srgb, var(--fg) 55%, var(--bg)));
+  --shade: color-mix(in srgb, var(--accent) 72%, #000);
+  --surface: color-mix(in srgb, var(--fg) 6%, var(--bg));
+  --outline: color-mix(in srgb, var(--fg) 26%, var(--bg));
+  --radius: 16px;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+:root[data-mode="dark"] {
+  --bg: #000;
+  --fg: #fff;
+  color-scheme: dark;
+}
