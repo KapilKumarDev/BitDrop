@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
+  "engines": { "node": ">=20.11" },
   "scripts": {
     "test": "node --test",
-    "start": "npx serve .",
+    "start": "serve .",
     "test:e2e": "playwright test"
   },
   "devDependencies": {

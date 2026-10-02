@@ -1,0 +1,13 @@
+.segmented { display: flex; padding: 4px; gap: 4px; border-radius: var(--radius-full); background: var(--surface); }
+.segmented--grid { display: grid; grid-template-columns: repeat(4, 1fr); border-radius: var(--radius); }
+.segmented--grid .seg { border-radius: calc(var(--radius) - 4px); }
+.seg {
+  position: relative; flex: 1; display: grid; place-items: center; min-height: var(--target);
+  border-radius: var(--radius-full); color: var(--fg); font-weight: 600; cursor: pointer;
+}
+.seg:has(:checked) { background: var(--accent); color: var(--on-accent); }
+.seg:has(:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .seg { transition: background-color 120ms ease; }
+}

@@ -1,19 +1,17 @@
-import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
+import { downloadCanvas } from '../../core/canvas/canvas.js';
+import { BIT_LEVELS, LEVEL_OPTIONS } from '../../core/levels/levels.js';
 import { loadImage } from '../../core/storage/image-store.js';
+import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
+import { ids } from '../../core/ui/dom.js';
 import { mountSegmented } from '../../core/ui/segmented.js';
-import { BIT_LEVELS, convert } from '../convert/convert.js';
-import { loadPixels, toCanvas, upscale } from '../convert/render.js';
-import { downloadCanvas } from '../export/export.js';
 import { mountCompare } from '../compare/compare-slider.js';
+import { convert } from '../convert/convert.js';
+import { loadPixels, toCanvas, upscale } from '../convert/render.js';
 import { openImageModal } from '../zoom-modal/zoom-modal.js';
 
 const FULL_SIDE = 1024; // zoom and export render the grid at least this big; the stage shows the small grid
-const stage = document.getElementById('stage');
-const art = document.getElementById('art');
-const original = document.getElementById('original');
-const compare = document.getElementById('compare');
-const artTag = document.getElementById('art-tag');
-const note = document.getElementById('note');
+const ui = ids();
+const report = (message) => { ui.note.textContent = message; };
 
 const VIEWS = [
   { value: 'art', label: 'Pixel art' },
@@ -22,54 +20,60 @@ const VIEWS = [
 ];
 
 const start = async () => {
-  const source = loadImage();
+  let source;
+  try {
+    source = await loadImage();
+  } catch {
+    report('The browser could not read the stored image. Go back and choose it again.');
+    return;
+  }
   if (!source) {
     location.replace('index.html');
     return;
   }
   const pixels = await loadPixels(source);
+  const originalUrl = URL.createObjectURL(source);
   const cache = new Map();
-  const canvasFor = (level, dither) => {
+  const artFor = (level, dither) => {
     const key = `${level}:${dither}`;
-    if (!cache.has(key)) cache.set(key, toCanvas(convert(pixels, level, { dither })));
+    if (!cache.has(key)) {
+      const canvas = toCanvas(convert(pixels, level, { dither }));
+      cache.set(key, { canvas, url: canvas.toDataURL() });
+    }
     return cache.get(key);
   };
 
   let { level, dither } = loadPrefs();
-  const fullSizeCanvas = () => upscale(canvasFor(level, dither), FULL_SIDE);
-  const ditherButton = document.getElementById('dither');
-  ditherButton.setAttribute('aria-pressed', String(dither));
-  const slider = mountCompare(stage, compare);
+  const fullSizeCanvas = () => upscale(artFor(level, dither).canvas, FULL_SIDE);
+  const slider = mountCompare(ui.stage, ui.compare);
   const showLevel = () => {
-    art.src = canvasFor(level, dither).toDataURL();
-    artTag.textContent = BIT_LEVELS[level].label;
+    ui.art.src = artFor(level, dither).url;
+    ui.tag.textContent = BIT_LEVELS[level].label;
   };
 
-  original.src = source;
+  ui.original.src = originalUrl;
+  ui.dither.setAttribute('aria-pressed', String(dither));
   showLevel();
 
-  mountSegmented(document.getElementById('view'), VIEWS, 'art', (view) => {
-    stage.dataset.view = view;
-    compare.hidden = view !== 'compare';
+  mountSegmented(ui.view, VIEWS, 'art', (view) => {
+    ui.stage.dataset.view = view;
+    ui.compare.hidden = view !== 'compare';
     if (view === 'compare') slider.sweepIn();
   });
-  mountSegmented(
-    document.getElementById('levels'),
-    Object.entries(BIT_LEVELS).map(([value, { label }]) => ({ value, label })),
-    String(level),
-    (value) => { level = Number(value); showLevel(); },
-  );
-  ditherButton.addEventListener('click', () => {
+  mountSegmented(ui.levels, LEVEL_OPTIONS, level, (value) => { level = value; showLevel(); });
+  ui.dither.addEventListener('click', () => {
     dither = !dither;
     savePrefs({ dither });
-    ditherButton.setAttribute('aria-pressed', String(dither));
+    ui.dither.setAttribute('aria-pressed', String(dither));
     showLevel();
   });
-  document.getElementById('zoom').addEventListener('click', () => {
-    const showingOriginal = stage.dataset.view === 'original';
-    openImageModal(showingOriginal ? source : fullSizeCanvas().toDataURL(), showingOriginal ? 'Original image' : 'Pixel art version');
+  ui.zoom.addEventListener('click', () => {
+    const showingOriginal = ui.stage.dataset.view === 'original';
+    openImageModal(showingOriginal ? originalUrl : fullSizeCanvas().toDataURL(), showingOriginal ? 'Original image' : 'Pixel art version');
   });
-  document.getElementById('export').addEventListener('click', () => downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`));
+  ui.export.addEventListener('click', () =>
+    downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`).catch(() => report('The image could not be exported. Try again.')),
+  );
 };
 
-start().catch(() => { note.textContent = 'This image could not be shown. Go back and choose another one.'; });
+start().catch(() => report('This image could not be shown. Go back and choose another one.'));

@@ -6,3 +6,5 @@ export const PALETTES = {
   lime: 'Lime',
   violet: 'Violet',
 };
+
+export const DEFAULT_PALETTE = 'mint';

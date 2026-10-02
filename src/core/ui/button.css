@@ -1,0 +1,18 @@
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--target); padding: 0 20px; border: 1px solid transparent; border-radius: var(--radius-full);
+  font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+  color: var(--accent); background: transparent;
+}
+.btn:active { background: var(--tint); }
+.btn--text { padding: 0 12px; }
+.btn--filled { background: var(--accent); color: var(--on-accent); }
+.btn--filled:active { background: var(--shade); }
+.btn--tonal { background: var(--tint-strong); color: var(--fg); }
+.btn--outlined { border-color: var(--outline); }
+.btn--block { width: 100%; }
+.btn--fab { min-height: var(--target-lg); padding: 0 24px; border-radius: var(--radius); box-shadow: 0 2px 8px color-mix(in srgb, var(--shade) 40%, transparent); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn { transition: background-color 120ms ease; }
+}

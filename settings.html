@@ -7,16 +7,18 @@
   <script src="src/core/theme/theme.js"></script>
   <link rel="stylesheet" href="src/core/theme/theme.css">
   <link rel="stylesheet" href="src/core/layout/shell.css">
+  <link rel="stylesheet" href="src/core/ui/button.css">
+  <link rel="stylesheet" href="src/core/ui/segmented.css">
   <link rel="stylesheet" href="src/features/settings/settings.css">
 </head>
 <body>
   <div class="app">
     <header class="app-bar">
-      <a class="btn btn--text" href="javascript:history.back()">Back</a>
+      <button class="btn btn--text app-bar__start" id="back" type="button">Back</button>
       <h1>Settings</h1>
     </header>
     <main class="main">
-      <section class="setting"><h2>Theme color</h2><div class="swatches" id="palette"></div></section>
+      <section class="setting"><h2>Theme color</h2><div class="swatches" id="palette" aria-label="Theme color"></div></section>
       <section class="setting"><h2>Appearance</h2><div class="segmented" id="mode" aria-label="Appearance"></div></section>
       <section class="setting"><h2>Default bit level</h2><div class="segmented segmented--grid" id="level" aria-label="Default bit level"></div></section>
     </main>

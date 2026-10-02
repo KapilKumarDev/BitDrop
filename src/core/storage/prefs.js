@@ -1,9 +1,24 @@
+import { BIT_LEVELS } from '../levels/levels.js';
+import { DEFAULT_PALETTE, PALETTES } from '../theme/palettes.js';
+import { MODES } from '../theme/modes.js';
+
 const KEY = 'art8:prefs';
-export const DEFAULT_PREFS = { palette: 'mint', mode: 'system', level: 8, dither: false };
+export const DEFAULT_PREFS = { palette: DEFAULT_PALETTE, mode: 'system', level: 8, dither: false };
+
+const IS_VALID = {
+  palette: (value) => typeof value === 'string' && Object.hasOwn(PALETTES, value),
+  mode: (value) => typeof value === 'string' && Object.hasOwn(MODES, value),
+  level: (value) => Number.isInteger(value) && Object.hasOwn(BIT_LEVELS, value),
+  dither: (value) => typeof value === 'boolean',
+};
+
+/** Stored values are untrusted: any that fails its check falls back to its default. */
+const sanitize = (stored) =>
+  Object.fromEntries(Object.entries(DEFAULT_PREFS).map(([key, fallback]) => [key, IS_VALID[key](stored?.[key]) ? stored[key] : fallback]));
 
 export const loadPrefs = () => {
   try {
-    return { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(KEY)) };
+    return sanitize(JSON.parse(localStorage.getItem(KEY)));
   } catch {
     return { ...DEFAULT_PREFS };
   }

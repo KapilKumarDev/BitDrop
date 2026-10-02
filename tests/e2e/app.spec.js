@@ -4,6 +4,10 @@ import { readFile } from 'node:fs/promises';
 
 const SAMPLE = path.join(import.meta.dirname, 'fixtures', 'sample.png');
 
+const group = (page, name) => page.getByRole('radiogroup', { name });
+const choose = (page, groupName, label) => group(page, groupName).locator('label').filter({ hasText: new RegExp(`^${label}$`) }).click();
+const checked = (page, groupName) => group(page, groupName).getByRole('radio', { checked: true });
+
 const openViewer = async (page) => {
   await page.goto('/');
   await page.locator('#file').setInputFiles(SAMPLE);
@@ -50,10 +54,10 @@ test('no page scrolls, including the viewer with all controls', async ({ page })
 
 test('viewer starts at 8-bit and switches level', async ({ page }) => {
   await openViewer(page);
-  await expect(page.locator('#levels [aria-checked="true"]')).toHaveText('8-bit');
+  await expect(checked(page, 'Bit level')).toHaveAccessibleName('8-bit');
   const before = await page.locator('#art').getAttribute('src');
-  await page.locator('#levels .seg', { hasText: /^10-bit$/ }).click();
-  await expect(page.locator('#art-tag')).toHaveText('10-bit');
+  await choose(page, 'Bit level', '10-bit');
+  await expect(page.locator('#tag')).toHaveText('10-bit');
   expect(await page.locator('#art').getAttribute('src')).not.toBe(before);
 });
 
@@ -74,9 +78,9 @@ test('the viewer shows the small pixel grid; zoom and export use the large rende
 
 test('original and compare views', async ({ page }) => {
   await openViewer(page);
-  await page.locator('#view .seg', { hasText: 'Original' }).click();
+  await choose(page, 'View', 'Original');
   await expect(page.locator('#art')).toBeHidden();
-  await page.locator('#view .seg', { hasText: 'Compare' }).click();
+  await choose(page, 'View', 'Compare');
   await expect(page.locator('#compare')).toBeVisible();
 
   const box = await page.locator('#stage').boundingBox();
@@ -93,7 +97,7 @@ test('original and compare views', async ({ page }) => {
 
 test('keyboard focus on the compare slider is visibly drawn', async ({ page }) => {
   await openViewer(page);
-  await page.locator('#view .seg', { hasText: 'Compare' }).click();
+  await choose(page, 'View', 'Compare');
   await expect(page.locator('#stage')).toHaveClass(/is-sweeping/);
   await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)));
   const compare = page.locator('#compare');
@@ -135,9 +139,9 @@ test('export downloads a png named for the level', async ({ page }) => {
 
 test('default level from settings applies to the next image', async ({ page }) => {
   await page.goto('/settings');
-  await page.locator('#level .seg', { hasText: /^12-bit$/ }).click();
+  await choose(page, 'Default bit level', '12-bit');
   await openViewer(page);
-  await expect(page.locator('#levels [aria-checked="true"]')).toHaveText('12-bit');
+  await expect(checked(page, 'Bit level')).toHaveAccessibleName('12-bit');
 });
 
 test('theme change shows on the page you go back to, without a refresh', async ({ page }) => {
@@ -146,9 +150,9 @@ test('theme change shows on the page you go back to, without a refresh', async (
   const accent = () => root.evaluate((el) => getComputedStyle(el).getPropertyValue('--accent'));
   const mint = await accent();
   await page.getByRole('link', { name: 'Settings' }).click();
-  await page.getByRole('button', { name: 'Rose' }).click();
-  await page.locator('#mode .seg', { hasText: 'Dark' }).click();
-  await page.getByRole('link', { name: 'Back' }).click();
+  await choose(page, 'Theme color', 'Rose');
+  await choose(page, 'Appearance', 'Dark');
+  await page.getByRole('button', { name: 'Back' }).click();
   await expect(page).toHaveURL(/\/viewer/);
   await expect(root).toHaveAttribute('data-mode', 'dark');
   expect(await accent()).not.toBe(mint);
@@ -215,4 +219,66 @@ test('dithering is off by default and the toggle changes the image', async ({ pa
   await dither.click();
   await expect(dither).toHaveAttribute('aria-pressed', 'true');
   expect(await page.locator('#art').getAttribute('src')).not.toBe(plain);
+});
+test('a choice group is one tab stop and arrow keys move the choice', async ({ page }) => {
+  await openViewer(page);
+  const levels = group(page, 'Bit level');
+  await levels.getByRole('radio', { checked: true }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(checked(page, 'Bit level')).toHaveAccessibleName('10-bit');
+  await expect(page.locator('#tag')).toHaveText('10-bit');
+  const stops = await levels.getByRole('radio').evaluateAll((radios) => radios.filter((radio) => radio.tabIndex >= 0 && radio.checked).length);
+  expect(stops).toBe(1);
+  await page.keyboard.press('Tab');
+  expect(await levels.evaluate((el) => el.contains(document.activeElement))).toBe(false);
+});
+
+test('theme swatches are a radio group too', async ({ page }) => {
+  await page.goto('/settings');
+  await expect(checked(page, 'Theme color')).toHaveAccessibleName('Mint');
+  await choose(page, 'Theme color', 'Sky');
+  await expect(checked(page, 'Theme color')).toHaveAccessibleName('Sky');
+});
+
+test('corrupt stored preferences fall back to defaults instead of breaking the viewer', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'nope', mode: 7, level: 'abc', dither: 'yes' })));
+  await openViewer(page);
+  await expect(checked(page, 'Bit level')).toHaveAccessibleName('8-bit');
+  await expect(page.locator('#note')).toHaveText('');
+});
+
+test('the zoom modal keeps keyboard focus inside and returns it on close', async ({ page }) => {
+  await openViewer(page);
+  await page.locator('#zoom').click();
+  const dialog = page.getByRole('dialog');
+  for (let i = 0; i < 6; i++) {
+    await page.keyboard.press('Tab');
+    // Focus may wrap out to the browser's own UI (body), but never lands on the inert page behind the dialog.
+    expect(await page.evaluate(() => document.activeElement === document.body || !!document.activeElement.closest('dialog'))).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('#zoom')).toBeFocused();
+});
+
+test('settings Back goes home when there is no earlier page', async ({ page }) => {
+  await page.goto('/settings');
+  await page.getByRole('button', { name: 'Back' }).click();
+  await expect(page).not.toHaveURL(/settings/);
+});
+
+test('in a short landscape viewport every control can be scrolled to', async ({ page }) => {
+  await page.setViewportSize({ width: 740, height: 360 });
+  await openViewer(page);
+  const exportButton = page.getByRole('button', { name: 'Export PNG' });
+  await exportButton.scrollIntoViewIfNeeded();
+  await expect(exportButton).toBeInViewport();
+});
+
+test('an image that cannot be stored is reported as a storage problem, not a bad file', async ({ page }) => {
+  await page.addInitScript(() => { indexedDB.open = () => { throw new Error('blocked'); }; });
+  await page.goto('/');
+  await page.locator('#file').setInputFiles(SAMPLE);
+  await expect(page.locator('#note')).toContainText('would not keep the image');
+  await expect(page).not.toHaveURL(/viewer/);
 });

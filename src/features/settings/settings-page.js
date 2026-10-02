@@ -1,35 +1,23 @@
-import { PALETTES } from '../../core/theme/palettes.js';
+import { LEVEL_OPTIONS } from '../../core/levels/levels.js';
 import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
+import { MODES } from '../../core/theme/modes.js';
+import { PALETTES } from '../../core/theme/palettes.js';
+import { ids } from '../../core/ui/dom.js';
 import { mountSegmented } from '../../core/ui/segmented.js';
-import { BIT_LEVELS } from '../convert/convert.js';
 
+const ui = ids();
 const prefs = loadPrefs();
+const optionsOf = (labels) => Object.entries(labels).map(([value, label]) => ({ value, label }));
 
-mountSegmented(
-  document.getElementById('mode'),
-  [{ value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }, { value: 'system', label: 'Auto' }],
-  prefs.mode,
-  (mode) => savePrefs({ mode }),
-);
-mountSegmented(
-  document.getElementById('level'),
-  Object.entries(BIT_LEVELS).map(([value, { label }]) => ({ value, label })),
-  String(prefs.level),
-  (level) => savePrefs({ level: Number(level) }),
-);
+mountSegmented(ui.palette, optionsOf(PALETTES), prefs.palette, (palette) => savePrefs({ palette }));
+mountSegmented(ui.mode, optionsOf(MODES), prefs.mode, (mode) => savePrefs({ mode }));
+mountSegmented(ui.level, LEVEL_OPTIONS, prefs.level, (level) => savePrefs({ level }));
 
-const palette = document.getElementById('palette');
-const swatches = Object.entries(PALETTES).map(([name, label]) => {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'swatch';
-  button.setAttribute('aria-label', label);
-  button.dataset.palette = name;
-  button.setAttribute('aria-pressed', String(name === prefs.palette));
-  button.addEventListener('click', () => {
-    savePrefs({ palette: name });
-    swatches.forEach((swatch) => swatch.setAttribute('aria-pressed', String(swatch === button)));
-  });
-  return button;
-});
-palette.append(...swatches);
+// Swatches are the same radio group, drawn in their own palette color with the name kept for screen readers.
+for (const swatch of ui.palette.children) {
+  swatch.dataset.palette = swatch.dataset.value;
+  swatch.querySelector('span').classList.add('visually-hidden');
+}
+
+// With no earlier page (opened directly) there is nothing to go back to, so go home.
+ui.back.addEventListener('click', () => (document.referrer ? history.back() : location.assign('index.html')));

@@ -8,7 +8,7 @@
   .stage.is-sweeping:not(.is-dragging) { transition: --split 700ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 }
 
-.compare { --grip: 48px; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.compare { --grip: var(--target); position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .compare::before {
   content: ''; position: absolute; top: 0; bottom: 0; left: var(--split);
   width: 4px; margin-left: -2px; background: var(--accent);
@@ -18,10 +18,7 @@
   content: ''; position: absolute; top: 50%; left: var(--split);
   width: var(--grip); height: var(--grip); margin: calc(var(--grip) / -2) 0 0 calc(var(--grip) / -2);
 }
-.compare__grip {
-  background: var(--accent);
-  clip-path: polygon(0 8px, 8px 8px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px));
-}
+.compare__grip { background: var(--accent); }
 .compare__grip::before, .compare__grip::after {
   content: ''; position: absolute; top: 50%; margin-top: -7px;
   border: 7px solid transparent;
@@ -29,7 +26,7 @@
 .compare__grip::before { left: 8px; border-right-color: var(--on-accent); border-left-width: 0; }
 .compare__grip::after { right: 8px; border-left-color: var(--on-accent); border-right-width: 0; }
 .compare__tag {
-  position: absolute; top: 8px; padding: 2px 12px; border-radius: 999px;
+  position: absolute; top: 8px; padding: 2px 12px; border-radius: var(--radius-full);
   background: var(--bg); color: var(--fg); font-size: 0.8rem; font-weight: 700;
 }
 .compare__tag--left { left: 8px; }

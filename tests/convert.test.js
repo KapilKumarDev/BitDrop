@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BIT_LEVELS, quantizeChannel, quantizeImage, pixelate, bayer, enhance, convert } from '../src/features/convert/convert.js';
+import { BIT_LEVELS } from '../src/core/levels/levels.js';
+import { quantizeChannel, quantizeImage, pixelate, bayer, enhance, convert } from '../src/features/convert/convert.js';
 
 test('quantizeChannel keeps black and white at any depth', () => {
   assert.equal(quantizeChannel(0, 3), 0);

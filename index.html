@@ -7,20 +7,21 @@
   <script src="src/core/theme/theme.js"></script>
   <link rel="stylesheet" href="src/core/theme/theme.css">
   <link rel="stylesheet" href="src/core/layout/shell.css">
+  <link rel="stylesheet" href="src/core/ui/button.css">
   <link rel="stylesheet" href="src/features/input/input.css">
 </head>
 <body>
   <div class="app">
     <header class="app-bar">
       <h1>8-bit Art Maker</h1>
-      <a class="btn btn--text" href="settings.html">Settings</a>
+      <a class="btn btn--text app-bar__end" href="settings.html">Settings</a>
     </header>
     <main class="main">
-      <label class="drop" id="drop">
-        <input class="drop__input" id="file" type="file" accept="image/*">
+      <label class="drop notched" id="drop">
+        <input class="visually-hidden" id="file" type="file" accept="image/*">
         <span class="drop__card">
           <strong class="drop__title">Choose a picture</strong>
-          <span>Tap here or drop an image. It turns into 8-bit pixel art right away.</span>
+          <span>Tap here or drop an image. It turns into pixel art right away.</span>
           <span class="btn btn--filled">Pick image</span>
         </span>
       </label>

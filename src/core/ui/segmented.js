@@ -1,26 +1,27 @@
-/** Single-choice button group. options: [{ value, label }]; values compare as strings. */
+/**
+ * Single-choice group built from native radio inputs, so the browser supplies the arrow-key
+ * navigation, the single tab stop and the checked state. el needs an id (the radio group name).
+ * options: [{ value, label }]; onChange receives the chosen option's own value.
+ */
 export const mountSegmented = (el, options, value, onChange) => {
   el.setAttribute('role', 'radiogroup');
   el.replaceChildren(
-    ...options.map((option) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'seg';
-      button.setAttribute('role', 'radio');
-      button.dataset.value = option.value;
-      button.textContent = option.label;
-      return button;
+    ...options.map((option, index) => {
+      const seg = document.createElement('label');
+      seg.className = 'seg';
+      seg.dataset.value = option.value;
+      const input = Object.assign(document.createElement('input'), {
+        type: 'radio',
+        name: el.id,
+        value: index,
+        checked: String(option.value) === String(value),
+      });
+      input.className = 'visually-hidden';
+      const label = document.createElement('span');
+      label.textContent = option.label;
+      seg.append(input, label);
+      return seg;
     }),
   );
-  const select = (next) => {
-    for (const button of el.children) button.setAttribute('aria-checked', String(button.dataset.value === String(next)));
-  };
-  select(value);
-  el.addEventListener('click', (event) => {
-    const button = event.target.closest('.seg');
-    if (!button) return;
-    select(button.dataset.value);
-    onChange(button.dataset.value);
-  });
-  return select;
+  el.addEventListener('change', (event) => onChange(options[event.target.value].value));
 };

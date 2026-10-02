@@ -7,6 +7,8 @@
   <script src="src/core/theme/theme.js"></script>
   <link rel="stylesheet" href="src/core/theme/theme.css">
   <link rel="stylesheet" href="src/core/layout/shell.css">
+  <link rel="stylesheet" href="src/core/ui/button.css">
+  <link rel="stylesheet" href="src/core/ui/segmented.css">
   <link rel="stylesheet" href="src/features/viewer/viewer.css">
   <link rel="stylesheet" href="src/features/compare/compare.css">
   <link rel="stylesheet" href="src/features/zoom-modal/zoom-modal.css">
@@ -14,9 +16,9 @@
 <body>
   <div class="app">
     <header class="app-bar">
-      <a class="btn btn--text" href="index.html">New image</a>
+      <a class="btn btn--text app-bar__start" href="index.html">New image</a>
       <h1>Viewer</h1>
-      <a class="btn btn--text" href="settings.html">Settings</a>
+      <a class="btn btn--text app-bar__end" href="settings.html">Settings</a>
     </header>
     <main class="main">
       <div class="viewport">
@@ -25,8 +27,8 @@
           <img class="stage__img stage__img--art" id="art" alt="Pixel art version" draggable="false">
           <div class="compare" id="compare" role="slider" tabindex="0" aria-label="Comparison position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" hidden>
             <span class="compare__tag compare__tag--left">Original</span>
-            <span class="compare__tag compare__tag--right" id="art-tag"></span>
-            <span class="compare__grip"></span>
+            <span class="compare__tag compare__tag--right" id="tag"></span>
+            <span class="compare__grip notched"></span>
           </div>
         </div>
         <button class="btn btn--tonal viewport__action viewport__dither" id="dither" type="button" aria-pressed="false">Dither</button>

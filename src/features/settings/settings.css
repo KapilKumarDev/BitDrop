@@ -1,8 +1,8 @@
 .setting { display: grid; gap: 8px; }
 .setting h2 { margin: 0; font-size: 1rem; color: var(--tone); }
 .swatches { display: flex; flex-wrap: wrap; gap: 12px; }
-.swatch {
-  width: 56px; height: 56px; border: 3px solid transparent; border-radius: var(--radius);
-  background: var(--palette); cursor: pointer;
+.swatches .seg {
+  flex: none; width: var(--target-lg); height: var(--target-lg); box-sizing: border-box;
+  border: 3px solid transparent; border-radius: var(--radius); background: var(--palette);
 }
-.swatch[aria-pressed="true"] { border-color: var(--fg); }
+.swatches .seg:has(:checked) { background: var(--palette); border-color: var(--fg); }
