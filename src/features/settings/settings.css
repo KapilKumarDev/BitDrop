@@ -3,6 +3,6 @@
 .swatches { display: flex; flex-wrap: wrap; gap: 12px; }
 .swatch {
   width: 56px; height: 56px; border: 3px solid transparent; border-radius: var(--radius);
-  background: var(--swatch); cursor: pointer;
+  background: var(--palette); cursor: pointer;
 }
 .swatch[aria-pressed="true"] { border-color: var(--fg); }

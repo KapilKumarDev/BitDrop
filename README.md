@@ -15,4 +15,4 @@ Turns a picture into 8-, 16- or 32-bit pixel art. Static site; the only dependen
 4, 6, 8, 10, 12, 16, 24 and 32. Color depth is the real RGB split (8-bit = 3-3-2, 10-bit = 3-4-3, 16-bit = 5-6-5, 24-bit = 8-8-8) and the pixel grid grows with the level (64 px at 8-bit, 256 px at 32-bit). Dithering is optional (off by default, toggle on the viewer) and skips flat areas.
 
 ## Theme
-Only `--bg`/`--fg` change between light and dark. The accent is chosen at equal contrast against white and black.
+Only `--bg`/`--fg` change between light and dark, through `light-dark()`; with no stored choice the system setting decides, in pure CSS. Each accent is a fixed value in `theme.css` that keeps equal contrast against white and black (checked by `tests/theme.test.js`). `src/core/theme/theme.js` is a classic script in every page's `<head>`: it blocks the first paint so the stored choice is applied before anything is drawn.

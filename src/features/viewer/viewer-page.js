@@ -1,4 +1,3 @@
-import { applyTheme } from '../../core/theme/theme-store.js';
 import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
 import { loadImage } from '../../core/storage/image-store.js';
 import { mountSegmented } from '../../core/ui/segmented.js';
@@ -73,5 +72,4 @@ const start = async () => {
   document.getElementById('export').addEventListener('click', () => downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`));
 };
 
-applyTheme();
 start().catch(() => { note.textContent = 'This image could not be shown. Go back and choose another one.'; });

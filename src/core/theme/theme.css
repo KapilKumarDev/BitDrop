@@ -1,9 +1,19 @@
+/* One accent per palette, each keeping >= 4.4:1 against both white and black (tests/theme.test.js).
+   The page root and the swatches on the settings page choose one through data-palette. */
+:root, [data-palette="mint"] { --palette: #218557; }
+[data-palette="sky"] { --palette: #2d7bb2; }
+[data-palette="rose"] { --palette: #cf4164; }
+[data-palette="lime"] { --palette: #598120; }
+[data-palette="violet"] { --palette: #8e5ad6; }
+
 /* Only --bg and --fg change between light and dark. Every other color is a
-   tint (accent + bg), tone (accent + gray) or shade (accent + black) of them. */
+   tint (accent + bg), tone (accent + gray) or shade (accent + black) of them.
+   color-scheme follows the system unless data-mode forces one. */
 :root {
-  --bg: #fff;
-  --fg: #000;
-  --accent: #1f9d6b;
+  color-scheme: light dark;
+  --bg: light-dark(#fff, #000);
+  --fg: light-dark(#000, #fff);
+  --accent: var(--palette);
   --on-accent: #fff;
   --tint: color-mix(in srgb, var(--accent) 14%, var(--bg));
   --tint-strong: color-mix(in srgb, var(--accent) 30%, var(--bg));
@@ -13,10 +23,6 @@
   --outline: color-mix(in srgb, var(--fg) 26%, var(--bg));
   --radius: 16px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color-scheme: light;
 }
-:root[data-mode="dark"] {
-  --bg: #000;
-  --fg: #fff;
-  color-scheme: dark;
-}
+:root[data-mode="light"] { color-scheme: light; }
+:root[data-mode="dark"] { color-scheme: dark; }

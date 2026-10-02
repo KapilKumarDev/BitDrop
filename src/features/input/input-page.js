@@ -1,4 +1,3 @@
-import { applyTheme } from '../../core/theme/theme-store.js';
 import { saveImage } from '../../core/storage/image-store.js';
 
 const MAX_SIDE = 1024;
@@ -31,7 +30,6 @@ const accept = async (picked) => {
   }
 };
 
-applyTheme();
 file.addEventListener('change', () => accept(file.files[0]));
 drop.addEventListener('dragover', (event) => event.preventDefault());
 drop.addEventListener('drop', (event) => {

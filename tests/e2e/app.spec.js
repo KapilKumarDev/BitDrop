@@ -143,14 +143,53 @@ test('default level from settings applies to the next image', async ({ page }) =
 test('theme change shows on the page you go back to, without a refresh', async ({ page }) => {
   await openViewer(page);
   const root = page.locator('html');
-  const mint = await root.evaluate((el) => el.style.getPropertyValue('--accent'));
+  const accent = () => root.evaluate((el) => getComputedStyle(el).getPropertyValue('--accent'));
+  const mint = await accent();
   await page.getByRole('link', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'Rose' }).click();
   await page.locator('#mode .seg', { hasText: 'Dark' }).click();
   await page.getByRole('link', { name: 'Back' }).click();
   await expect(page).toHaveURL(/\/viewer/);
   await expect(root).toHaveAttribute('data-mode', 'dark');
-  expect(await root.evaluate((el) => el.style.getPropertyValue('--accent'))).not.toBe(mint);
+  expect(await accent()).not.toBe(mint);
+});
+
+const themeNow = (page) =>
+  page.evaluate(() => ({
+    background: getComputedStyle(document.body).backgroundColor,
+    accent: getComputedStyle(document.documentElement).getPropertyValue('--accent'),
+  }));
+
+const paletteColor = (page, name) =>
+  page.evaluate((palette) => {
+    const probe = Object.assign(document.createElement('i'), { hidden: true });
+    probe.dataset.palette = palette;
+    document.body.append(probe);
+    const color = getComputedStyle(probe).getPropertyValue('--palette');
+    probe.remove();
+    return color;
+  }, name);
+
+test('a stored theme is already applied before the page scripts run (no flash)', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'rose', mode: 'dark' })));
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  await page.route('**/input-page.js', async (route) => { await gate; await route.continue(); });
+  await page.goto('/', { waitUntil: 'commit' });
+  await page.locator('.drop').waitFor({ state: 'attached' });
+  const painted = await themeNow(page);
+  const rose = await paletteColor(page, 'rose');
+  release();
+  expect(painted.background).toBe('rgb(0, 0, 0)');
+  expect(painted.accent).toBe(rose);
+});
+
+test('with no stored choice the theme follows the system setting, live', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+  expect((await themeNow(page)).background).toBe('rgb(0, 0, 0)');
+  await page.emulateMedia({ colorScheme: 'light' });
+  expect((await themeNow(page)).background).toBe('rgb(255, 255, 255)');
 });
 
 test('zoomed modal image can be panned by dragging', async ({ page }) => {

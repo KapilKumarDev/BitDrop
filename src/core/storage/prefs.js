@@ -16,5 +16,6 @@ export const savePrefs = (patch) => {
   } catch {
     /* storage unavailable: the choice still applies for this page view */
   }
+  dispatchEvent(new Event('prefschange')); // theme.js re-applies the theme
   return next;
 };
