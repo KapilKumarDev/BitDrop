@@ -8,7 +8,7 @@ import { downloadCanvas } from '../export/export.js';
 import { mountCompare } from '../compare/compare-slider.js';
 import { openImageModal } from '../zoom-modal/zoom-modal.js';
 
-const EXPORT_MIN_SIDE = 1024;
+const FULL_SIDE = 1024; // zoom and export render the grid at least this big; the stage shows the small grid
 const stage = document.getElementById('stage');
 const art = document.getElementById('art');
 const original = document.getElementById('original');
@@ -32,11 +32,12 @@ const start = async () => {
   const cache = new Map();
   const canvasFor = (level, dither) => {
     const key = `${level}:${dither}`;
-    if (!cache.has(key)) cache.set(key, upscale(toCanvas(convert(pixels, level, { dither })), EXPORT_MIN_SIDE));
+    if (!cache.has(key)) cache.set(key, toCanvas(convert(pixels, level, { dither })));
     return cache.get(key);
   };
 
   let { level, dither } = loadPrefs();
+  const fullSizeCanvas = () => upscale(canvasFor(level, dither), FULL_SIDE);
   const ditherButton = document.getElementById('dither');
   ditherButton.setAttribute('aria-pressed', String(dither));
   const slider = mountCompare(stage, compare);
@@ -67,9 +68,9 @@ const start = async () => {
   });
   document.getElementById('zoom').addEventListener('click', () => {
     const showingOriginal = stage.dataset.view === 'original';
-    openImageModal(showingOriginal ? source : art.src, showingOriginal ? 'Original image' : 'Pixel art version');
+    openImageModal(showingOriginal ? source : fullSizeCanvas().toDataURL(), showingOriginal ? 'Original image' : 'Pixel art version');
   });
-  document.getElementById('export').addEventListener('click', () => downloadCanvas(canvasFor(level, dither), `pixel-art-${level}bit.png`));
+  document.getElementById('export').addEventListener('click', () => downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`));
 };
 
 applyTheme();

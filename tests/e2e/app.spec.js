@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 
 const SAMPLE = path.join(import.meta.dirname, 'fixtures', 'sample.png');
 
@@ -21,6 +22,16 @@ test('input page rejects a file that is not an image', async ({ page }) => {
   await page.locator('#file').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hi') });
   await expect(page.locator('#note')).toContainText('not an image');
   await expect(page).not.toHaveURL(/viewer/);
+});
+
+test('keyboard alone reaches the file picker, shows focus, and opens it', async ({ page }) => {
+  await page.goto('/');
+  await page.keyboard.press('Tab'); // Settings link
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#file')).toBeFocused();
+  await expect(page.locator('.drop__card')).toHaveCSS('outline-style', 'solid');
+  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Enter')]);
+  expect(chooser.isMultiple()).toBe(false);
 });
 
 test('viewer without an image sends you back to the input page', async ({ page }) => {
@@ -46,6 +57,21 @@ test('viewer starts at 8-bit and switches level', async ({ page }) => {
   expect(await page.locator('#art').getAttribute('src')).not.toBe(before);
 });
 
+test('the viewer shows the small pixel grid; zoom and export use the large render', async ({ page }) => {
+  await openViewer(page);
+  const naturalWidth = (locator) => locator.evaluate((img) => img.naturalWidth);
+  expect(await naturalWidth(page.locator('#art'))).toBeLessThanOrEqual(64);
+
+  await page.locator('#zoom').click();
+  const modalImage = page.getByRole('dialog').locator('.modal__img');
+  await expect.poll(() => naturalWidth(modalImage)).toBeGreaterThanOrEqual(1024);
+  await page.keyboard.press('Escape');
+
+  const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#export').click()]);
+  const png = await readFile(await download.path());
+  expect(png.readUInt32BE(16)).toBeGreaterThanOrEqual(1024); // IHDR width
+});
+
 test('original and compare views', async ({ page }) => {
   await openViewer(page);
   await page.locator('#view .seg', { hasText: 'Original' }).click();
@@ -63,6 +89,23 @@ test('original and compare views', async ({ page }) => {
   await page.locator('#compare').focus();
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('#compare')).toHaveAttribute('aria-valuenow', '30');
+});
+
+test('keyboard focus on the compare slider is visibly drawn', async ({ page }) => {
+  await openViewer(page);
+  await page.locator('#view .seg', { hasText: 'Compare' }).click();
+  await expect(page.locator('#stage')).toHaveClass(/is-sweeping/);
+  await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)));
+  const compare = page.locator('#compare');
+  for (let i = 0; i < 10 && !(await compare.evaluate((el) => el === document.activeElement)); i++) {
+    await page.keyboard.press('Shift+Tab');
+  }
+  await expect(compare).toBeFocused();
+  const grip = await page.locator('.compare__grip').boundingBox();
+  const clip = { x: grip.x - 16, y: grip.y - 16, width: grip.width + 32, height: grip.height + 32 };
+  const focused = await page.screenshot({ clip });
+  await compare.blur();
+  expect(focused.equals(await page.screenshot({ clip }))).toBe(false);
 });
 
 test('zoom modal opens, zooms, and closes three ways', async ({ page }) => {

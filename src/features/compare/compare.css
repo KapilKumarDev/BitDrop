@@ -8,13 +8,17 @@
   .stage.is-sweeping:not(.is-dragging) { transition: --split 700ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 }
 
-.compare { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.compare { --grip: 48px; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .compare::before {
   content: ''; position: absolute; top: 0; bottom: 0; left: var(--split);
   width: 4px; margin-left: -2px; background: var(--accent);
 }
+/* The focus ring is a pseudo-element on the same box: the grip's clip-path would clip an outline drawn on it. */
+.compare__grip, .compare:focus-visible::after {
+  content: ''; position: absolute; top: 50%; left: var(--split);
+  width: var(--grip); height: var(--grip); margin: calc(var(--grip) / -2) 0 0 calc(var(--grip) / -2);
+}
 .compare__grip {
-  position: absolute; top: 50%; left: var(--split); width: 48px; height: 48px; margin: -24px 0 0 -24px;
   background: var(--accent);
   clip-path: polygon(0 8px, 8px 8px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px));
 }
@@ -30,4 +34,4 @@
 }
 .compare__tag--left { left: 8px; }
 .compare__tag--right { right: 8px; }
-.compare:focus-visible .compare__grip { outline: 3px solid var(--fg); outline-offset: 2px; }
+.compare:focus-visible::after { outline: 3px solid var(--fg); outline-offset: 2px; box-shadow: 0 0 0 2px var(--bg); }

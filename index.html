@@ -15,14 +15,14 @@
       <a class="btn btn--text" href="settings.html">Settings</a>
     </header>
     <main class="main">
-      <label class="drop" id="drop" for="file">
+      <label class="drop" id="drop">
+        <input class="drop__input" id="file" type="file" accept="image/*">
         <span class="drop__card">
           <strong class="drop__title">Choose a picture</strong>
           <span>Tap here or drop an image. It turns into 8-bit pixel art right away.</span>
           <span class="btn btn--filled">Pick image</span>
         </span>
       </label>
-      <input id="file" type="file" accept="image/*" hidden>
       <p class="note" id="note" role="status"></p>
     </main>
   </div>
