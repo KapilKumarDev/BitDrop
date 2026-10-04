@@ -7,10 +7,15 @@ export const splitFromPointer = (clientX, left, width) => (width > 0 ? clamp(((c
 
 export const stepSplit = (value, key) => {
   switch (key) {
-    case 'ArrowLeft': return clamp(value - STEP);
-    case 'ArrowRight': return clamp(value + STEP);
-    case 'Home': return 0;
-    case 'End': return 100;
-    default: return value;
+    case 'ArrowLeft':
+      return clamp(value - STEP);
+    case 'ArrowRight':
+      return clamp(value + STEP);
+    case 'Home':
+      return 0;
+    case 'End':
+      return 100;
+    default:
+      return value;
   }
 };

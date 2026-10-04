@@ -1,6 +1,6 @@
 import { BIT_LEVELS } from '../levels/levels.js';
-import { DEFAULT_PALETTE, PALETTES } from '../theme/palettes.js';
 import { MODES } from '../theme/modes.js';
+import { DEFAULT_PALETTE, PALETTES } from '../theme/palettes.js';
 
 const KEY = 'art8:prefs';
 export const DEFAULT_PREFS = { palette: DEFAULT_PALETTE, mode: 'system', level: 8, dither: false };
@@ -16,13 +16,15 @@ const IS_VALID = {
 const sanitize = (stored) =>
   Object.fromEntries(Object.entries(DEFAULT_PREFS).map(([key, fallback]) => [key, IS_VALID[key](stored?.[key]) ? stored[key] : fallback]));
 
-export const loadPrefs = () => {
+const read = () => {
   try {
-    return sanitize(JSON.parse(localStorage.getItem(KEY)));
+    return JSON.parse(localStorage.getItem(KEY));
   } catch {
-    return { ...DEFAULT_PREFS };
+    return null; // unreadable or unavailable storage: sanitize turns this into the defaults
   }
 };
+
+export const loadPrefs = () => sanitize(read());
 
 export const savePrefs = (patch) => {
   const next = { ...loadPrefs(), ...patch };

@@ -2,7 +2,7 @@ import { downloadCanvas } from '../../core/canvas/canvas.js';
 import { BIT_LEVELS, LEVEL_OPTIONS } from '../../core/levels/levels.js';
 import { loadImage } from '../../core/storage/image-store.js';
 import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
-import { ids } from '../../core/ui/dom.js';
+import { ids, report } from '../../core/ui/dom.js';
 import { mountSegmented } from '../../core/ui/segmented.js';
 import { mountCompare } from '../compare/compare-slider.js';
 import { convert } from '../convert/convert.js';
@@ -11,7 +11,6 @@ import { openImageModal } from '../zoom-modal/zoom-modal.js';
 
 const FULL_SIDE = 1024; // zoom and export render the grid at least this big; the stage shows the small grid
 const ui = ids();
-const report = (message) => { ui.note.textContent = message; };
 
 const VIEWS = [
   { value: 'art', label: 'Pixel art' },
@@ -46,26 +45,28 @@ const start = async () => {
   let { level, dither } = loadPrefs();
   const fullSizeCanvas = () => upscale(artFor(level, dither).canvas, FULL_SIDE);
   const slider = mountCompare(ui.stage, ui.compare);
-  const showLevel = () => {
+  const show = () => {
     ui.art.src = artFor(level, dither).url;
     ui.tag.textContent = BIT_LEVELS[level].label;
+    ui.dither.setAttribute('aria-pressed', String(dither));
   };
 
   ui.original.src = originalUrl;
-  ui.dither.setAttribute('aria-pressed', String(dither));
-  showLevel();
+  show();
 
   mountSegmented(ui.view, VIEWS, 'art', (view) => {
     ui.stage.dataset.view = view;
     ui.compare.hidden = view !== 'compare';
     if (view === 'compare') slider.sweepIn();
   });
-  mountSegmented(ui.levels, LEVEL_OPTIONS, level, (value) => { level = value; showLevel(); });
+  mountSegmented(ui.levels, LEVEL_OPTIONS, level, (value) => {
+    level = value;
+    show();
+  });
   ui.dither.addEventListener('click', () => {
     dither = !dither;
     savePrefs({ dither });
-    ui.dither.setAttribute('aria-pressed', String(dither));
-    showLevel();
+    show();
   });
   ui.zoom.addEventListener('click', () => {
     const showingOriginal = ui.stage.dataset.view === 'original';

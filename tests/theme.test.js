@@ -1,8 +1,8 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { PALETTES } from '../src/core/theme/palettes.js';
+import test from 'node:test';
 import { DEFAULT_PREFS } from '../src/core/storage/prefs.js';
+import { PALETTES } from '../src/core/theme/palettes.js';
 
 const css = readFileSync(new URL('../src/core/theme/theme.css', import.meta.url), 'utf8');
 
@@ -39,5 +39,5 @@ test('every palette accent reads on both pure white and pure black', () => {
 });
 
 test('the default palette is the one theme.css uses when no palette is chosen', () => {
-  assert.match(css, new RegExp(`:root, \\[data-palette="${DEFAULT_PREFS.palette}"\\]\\s*\\{`));
+  assert.match(css, new RegExp(`:root,\\s*\\[data-palette="${DEFAULT_PREFS.palette}"\\]\\s*\\{`));
 });

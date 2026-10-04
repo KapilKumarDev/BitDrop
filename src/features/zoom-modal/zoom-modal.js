@@ -1,4 +1,4 @@
-import { clampZoom, stepZoom, MIN_ZOOM } from './zoom.js';
+import { clampZoom, MIN_ZOOM, stepZoom } from './zoom.js';
 
 const TEMPLATE = `
   <div class="modal__stage"><img class="modal__img" draggable="false"></div>
@@ -50,10 +50,14 @@ export const openImageModal = (src, alt) => {
     else if (act === 'in') setZoom(stepZoom(zoom, 1));
     else if (act === 'out') setZoom(stepZoom(zoom, -1));
   });
-  stage.addEventListener('wheel', (event) => {
-    event.preventDefault();
-    setZoom(stepZoom(zoom, -Math.sign(event.deltaY)));
-  }, { passive: false });
+  stage.addEventListener(
+    'wheel',
+    (event) => {
+      event.preventDefault();
+      setZoom(stepZoom(zoom, -Math.sign(event.deltaY)));
+    },
+    { passive: false },
+  );
   image.addEventListener('pointerdown', (event) => {
     pointers.set(event.pointerId, event);
     pinch = 0;

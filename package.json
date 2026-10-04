@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "engines": { "node": ">=20.11" },
+  "engines": {
+    "node": ">=20.11"
+  },
   "scripts": {
     "test": "node --test",
     "start": "serve .",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=chromium",
+    "check": "biome check .",
+    "test:browsers": "playwright test --project=firefox --project=webkit"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@playwright/test": "^1.56.0",
     "serve": "^14.2.6"
   }

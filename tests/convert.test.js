@@ -1,7 +1,7 @@
-import test from 'node:test';
 import assert from 'node:assert/strict';
+import test from 'node:test';
 import { BIT_LEVELS } from '../src/core/levels/levels.js';
-import { quantizeChannel, quantizeImage, pixelate, bayer, enhance, convert } from '../src/features/convert/convert.js';
+import { bayer, convert, enhance, pixelate, quantizeChannel, quantizeImage } from '../src/features/convert/convert.js';
 
 test('quantizeChannel keeps black and white at any depth', () => {
   assert.equal(quantizeChannel(0, 3), 0);
@@ -26,14 +26,17 @@ test('quantizeImage changes rgb and leaves alpha alone', () => {
 });
 
 test('pixelate averages blocks down to the target grid', () => {
-  const img = { width: 4, height: 2, data: new Uint8ClampedArray([
-    0,0,0,255, 100,0,0,255, 200,0,0,255, 200,0,0,255,
-    0,0,0,255, 100,0,0,255, 200,0,0,255, 200,0,0,255,
-  ]) };
+  const img = {
+    width: 4,
+    height: 2,
+    data: new Uint8ClampedArray([
+      0, 0, 0, 255, 100, 0, 0, 255, 200, 0, 0, 255, 200, 0, 0, 255, 0, 0, 0, 255, 100, 0, 0, 255, 200, 0, 0, 255, 200, 0, 0, 255,
+    ]),
+  };
   const out = pixelate(img, 2);
   assert.equal(out.width, 2);
   assert.equal(out.height, 1);
-  assert.deepEqual([...out.data], [50,0,0,255, 200,0,0,255]);
+  assert.deepEqual([...out.data], [50, 0, 0, 255, 200, 0, 0, 255]);
 });
 
 test('pixelate never upscales a small image', () => {
@@ -96,7 +99,11 @@ test('every bit level uses its own depth, capped at 24-bit color, with a growing
   let lastGrid = 0;
   for (const level of levels) {
     const { bits, grid } = BIT_LEVELS[level];
-    assert.equal(bits.reduce((a, b) => a + b, 0), Math.min(level, 24), `${level}-bit`);
+    assert.equal(
+      bits.reduce((a, b) => a + b, 0),
+      Math.min(level, 24),
+      `${level}-bit`,
+    );
     assert.ok(bits.every((b) => b >= 1));
     assert.ok(grid > lastGrid, `${level}-bit grid grows`);
     lastGrid = grid;
@@ -111,7 +118,9 @@ test('nothing is dithered unless asked for', () => {
 
 test('convert passes the dither option through', () => {
   const ramp = grid(64, 8, (x) => x * 4);
-  const mixedColumns = (img) => Array.from({ length: 64 }, (_, x) => new Set(Array.from({ length: 8 }, (_, y) => reds(img)[y * 64 + x])).size).filter((n) => n > 1).length;
+  const mixedColumns = (img) =>
+    Array.from({ length: 64 }, (_, x) => new Set(Array.from({ length: 8 }, (_, y) => reds(img)[y * 64 + x])).size).filter((n) => n > 1)
+      .length;
   assert.equal(mixedColumns(convert(ramp, 8)), 0);
   assert.ok(mixedColumns(convert(ramp, 8, { dither: true })) > 0);
 });

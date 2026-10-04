@@ -42,10 +42,12 @@ export const mountCompare = (stage, handle) => {
     sweepIn() {
       stage.classList.remove('is-sweeping');
       set(100);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        stage.classList.add('is-sweeping');
-        set(50);
-      }));
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          stage.classList.add('is-sweeping');
+          set(50);
+        }),
+      );
     },
   };
 };

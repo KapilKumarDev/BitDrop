@@ -1,11 +1,15 @@
-import { test, expect } from '@playwright/test';
-import path from 'node:path';
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import { expect, test } from '@playwright/test';
 
 const SAMPLE = path.join(import.meta.dirname, 'fixtures', 'sample.png');
 
 const group = (page, name) => page.getByRole('radiogroup', { name });
-const choose = (page, groupName, label) => group(page, groupName).locator('label').filter({ hasText: new RegExp(`^${label}$`) }).click();
+const choose = (page, groupName, label) =>
+  group(page, groupName)
+    .locator('label')
+    .filter({ hasText: new RegExp(`^${label}$`) })
+    .click();
 const checked = (page, groupName) => group(page, groupName).getByRole('radio', { checked: true });
 
 const openViewer = async (page) => {
@@ -177,8 +181,13 @@ const paletteColor = (page, name) =>
 test('a stored theme is already applied before the page scripts run (no flash)', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'rose', mode: 'dark' })));
   let release;
-  const gate = new Promise((resolve) => { release = resolve; });
-  await page.route('**/input-page.js', async (route) => { await gate; await route.continue(); });
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/input-page.js', async (route) => {
+    await gate;
+    await route.continue();
+  });
   await page.goto('/', { waitUntil: 'commit' });
   await page.locator('.drop').waitFor({ state: 'attached' });
   const painted = await themeNow(page);
@@ -227,7 +236,9 @@ test('a choice group is one tab stop and arrow keys move the choice', async ({ p
   await page.keyboard.press('ArrowRight');
   await expect(checked(page, 'Bit level')).toHaveAccessibleName('10-bit');
   await expect(page.locator('#tag')).toHaveText('10-bit');
-  const stops = await levels.getByRole('radio').evaluateAll((radios) => radios.filter((radio) => radio.tabIndex >= 0 && radio.checked).length);
+  const stops = await levels
+    .getByRole('radio')
+    .evaluateAll((radios) => radios.filter((radio) => radio.tabIndex >= 0 && radio.checked).length);
   expect(stops).toBe(1);
   await page.keyboard.press('Tab');
   expect(await levels.evaluate((el) => el.contains(document.activeElement))).toBe(false);
@@ -241,7 +252,9 @@ test('theme swatches are a radio group too', async ({ page }) => {
 });
 
 test('corrupt stored preferences fall back to defaults instead of breaking the viewer', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'nope', mode: 7, level: 'abc', dither: 'yes' })));
+  await page.addInitScript(() =>
+    localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'nope', mode: 7, level: 'abc', dither: 'yes' })),
+  );
   await openViewer(page);
   await expect(checked(page, 'Bit level')).toHaveAccessibleName('8-bit');
   await expect(page.locator('#note')).toHaveText('');
@@ -276,7 +289,11 @@ test('in a short landscape viewport every control can be scrolled to', async ({ 
 });
 
 test('an image that cannot be stored is reported as a storage problem, not a bad file', async ({ page }) => {
-  await page.addInitScript(() => { indexedDB.open = () => { throw new Error('blocked'); }; });
+  await page.addInitScript(() => {
+    indexedDB.open = () => {
+      throw new Error('blocked');
+    };
+  });
   await page.goto('/');
   await page.locator('#file').setInputFiles(SAMPLE);
   await expect(page.locator('#note')).toContainText('would not keep the image');
