@@ -60,12 +60,14 @@ const grid = (width, height, valueAt) => {
   return { width, height, data };
 };
 const reds = (img) => img.data.filter((_, i) => i % 4 === 0);
+/** Distinct red values in each column of an image. */
+const distinctPerColumn = ({ width, height, data }) =>
+  Array.from({ length: width }, (_, x) => new Set(Array.from({ length: height }, (_, y) => data[(y * width + x) * 4])).size);
 
 test('dithering mixes two levels across a gradient', () => {
   const ramp = grid(16, 8, (x) => x * 17);
-  const column = (img) => new Set(Array.from({ length: 8 }, (_, y) => reds(img)[y * 16 + 7]));
-  assert.equal(column(quantizeImage(ramp, [1, 1, 1], { dither: false })).size, 1);
-  assert.equal(column(quantizeImage(ramp, [1, 1, 1], { dither: true })).size, 2);
+  assert.equal(distinctPerColumn(quantizeImage(ramp, [1, 1, 1], { dither: false }))[7], 1);
+  assert.equal(distinctPerColumn(quantizeImage(ramp, [1, 1, 1], { dither: true }))[7], 2);
 });
 
 test('a solid color stays one solid color even between palette levels', () => {
@@ -112,15 +114,12 @@ test('every bit level uses its own depth, capped at 24-bit color, with a growing
 
 test('nothing is dithered unless asked for', () => {
   const ramp = grid(16, 8, (x) => x * 17);
-  const columns = (img) => Array.from({ length: 16 }, (_, x) => new Set(Array.from({ length: 8 }, (_, y) => reds(img)[y * 16 + x])).size);
-  assert.ok(columns(quantizeImage(ramp, [1, 1, 1])).every((n) => n === 1));
+  assert.ok(distinctPerColumn(quantizeImage(ramp, [1, 1, 1])).every((n) => n === 1));
 });
 
 test('convert passes the dither option through', () => {
   const ramp = grid(64, 8, (x) => x * 4);
-  const mixedColumns = (img) =>
-    Array.from({ length: 64 }, (_, x) => new Set(Array.from({ length: 8 }, (_, y) => reds(img)[y * 64 + x])).size).filter((n) => n > 1)
-      .length;
+  const mixedColumns = (img) => distinctPerColumn(img).filter((n) => n > 1).length;
   assert.equal(mixedColumns(convert(ramp, 8)), 0);
   assert.ok(mixedColumns(convert(ramp, 8, { dither: true })) > 0);
 });
