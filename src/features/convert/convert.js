@@ -29,15 +29,13 @@ const isFlat = (data, width, height, x, y) => {
   );
 };
 
-export const quantizeImage = ({ width, height, data }, [rBits, gBits, bBits], { dither = false } = {}) => {
+export const quantizeImage = ({ width, height, data }, bits, { dither = false } = {}) => {
   const out = new Uint8ClampedArray(data);
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const i = (y * width + x) * 4;
       const offset = dither && !isFlat(data, width, height, x, y) ? bayer(x, y) : 0;
-      out[i] = quantizeChannel(out[i], rBits, offset);
-      out[i + 1] = quantizeChannel(out[i + 1], gBits, offset);
-      out[i + 2] = quantizeChannel(out[i + 2], bBits, offset);
+      for (let c = 0; c < 3; c++) out[i + c] = quantizeChannel(out[i + c], bits[c], offset);
     }
   }
   return { width, height, data: out };
@@ -49,11 +47,16 @@ export const enhance = ({ width, height, data }, { saturation = 1.3, contrast = 
   for (let i = 0; i < out.length; i += 4) {
     const luma = 0.299 * out[i] + 0.587 * out[i + 1] + 0.114 * out[i + 2];
     for (let c = 0; c < 3; c++) {
-      const saturated = luma + (out[i + c] - luma) * saturation;
-      out[i + c] = (saturated - 128) * contrast + 128;
+      out[i + c] = (luma + (out[i + c] - luma) * saturation - 128) * contrast + 128;
     }
   }
   return { width, height, data: out };
+};
+
+/** Source pixel range [start, end) that output cell `cell` of `outSize` covers; always at least one pixel. */
+const span = (cell, outSize, size) => {
+  const start = Math.floor((cell * size) / outSize);
+  return [start, Math.max(start + 1, Math.floor(((cell + 1) * size) / outSize))];
 };
 
 /** Box-average downscale so the longest side is at most maxSide; never upscales. */
@@ -63,11 +66,9 @@ export const pixelate = ({ width, height, data }, maxSide) => {
   const outH = Math.max(1, Math.round(height * scale));
   const out = new Uint8ClampedArray(outW * outH * 4);
   for (let y = 0; y < outH; y++) {
-    const y0 = Math.floor((y * height) / outH);
-    const y1 = Math.max(y0 + 1, Math.floor(((y + 1) * height) / outH));
+    const [y0, y1] = span(y, outH, height);
     for (let x = 0; x < outW; x++) {
-      const x0 = Math.floor((x * width) / outW);
-      const x1 = Math.max(x0 + 1, Math.floor(((x + 1) * width) / outW));
+      const [x0, x1] = span(x, outW, width);
       const sum = [0, 0, 0, 0];
       for (let sy = y0; sy < y1; sy++) {
         for (let sx = x0; sx < x1; sx++) {

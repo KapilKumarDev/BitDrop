@@ -1,16 +1,24 @@
+/* Page shell: viewport, app bar, main column, shared a11y helpers. Tokens come from theme.css. */
+
 html,
 body {
   margin: 0;
-  height: 100%;
   overflow: hidden;
   overscroll-behavior: none;
   background: var(--bg);
   color: var(--fg);
   font: 16px / 1.4 var(--font);
+  -webkit-text-size-adjust: 100%;
+  accent-color: var(--accent);
 }
+::selection {
+  background: var(--tint-strong);
+  color: var(--fg);
+}
+
 .app {
-  height: 100dvh;
   box-sizing: border-box;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -42,6 +50,7 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 .app-bar__start {
   grid-column: 1;
@@ -51,6 +60,7 @@ body {
   grid-column: 3;
   justify-self: end;
 }
+
 .main {
   flex: 1;
   min-height: 0;
@@ -59,9 +69,10 @@ body {
   gap: 12px;
   padding: 4px 16px 16px;
 }
+/* Status line. Keeps its height when empty so a message never shifts the layout. */
 .note {
   margin: 0;
-  min-height: 1.4em;
+  min-height: 1lh;
   color: var(--tone);
 }
 
@@ -74,7 +85,10 @@ body {
   width: 1px;
   height: 1px;
   margin: -1px;
+  padding: 0;
+  border: 0;
   overflow: hidden;
+  white-space: nowrap;
   clip-path: inset(50%);
 }
 
@@ -82,18 +96,19 @@ body {
    element is clipped, so draw it on a child or pseudo-element. */
 .notched {
   --_n: var(--notch, 8px);
+  --_f: calc(100% - var(--_n));
   clip-path: polygon(
     0 var(--_n),
     var(--_n) var(--_n),
     var(--_n) 0,
-    calc(100% - var(--_n)) 0,
-    calc(100% - var(--_n)) var(--_n),
+    var(--_f) 0,
+    var(--_f) var(--_n),
     100% var(--_n),
-    100% calc(100% - var(--_n)),
-    calc(100% - var(--_n)) calc(100% - var(--_n)),
-    calc(100% - var(--_n)) 100%,
+    100% var(--_f),
+    var(--_f) var(--_f),
+    var(--_f) 100%,
     var(--_n) 100%,
-    var(--_n) calc(100% - var(--_n)),
-    0 calc(100% - var(--_n))
+    var(--_n) var(--_f),
+    0 var(--_f)
   );
 }

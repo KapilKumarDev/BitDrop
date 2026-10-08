@@ -1,23 +1,20 @@
 // The picked image travels from the input page to the viewer as a Blob in IndexedDB: lossless (no re-encoding
 // noise) and without sessionStorage's ~5 MB string quota.
-const [DB, STORE, KEY] = ['art8', 'image', 'current'];
+const DB = 'art8', STORE = 'image', KEY = 'current';
 
-const openDb = () =>
-  new Promise((resolve, reject) => {
+const run = async (mode, operation) => {
+  const db = await new Promise((resolve, reject) => {
     const request = indexedDB.open(DB, 1);
     request.onupgradeneeded = () => request.result.createObjectStore(STORE);
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
-
-const run = async (mode, operation) => {
-  const db = await openDb();
   try {
     return await new Promise((resolve, reject) => {
       const transaction = db.transaction(STORE, mode);
       const request = operation(transaction.objectStore(STORE));
       transaction.oncomplete = () => resolve(request.result);
-      transaction.onerror = transaction.onabort = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   } finally {
     db.close();

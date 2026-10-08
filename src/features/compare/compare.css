@@ -24,7 +24,7 @@
   bottom: 0;
   left: var(--split);
   width: 4px;
-  margin-left: -2px;
+  translate: -50%;
   background: var(--accent);
 }
 /* The focus ring is a pseudo-element on the same box: the grip's clip-path would clip an outline drawn on it. */
@@ -36,7 +36,7 @@
   left: var(--split);
   width: var(--grip);
   height: var(--grip);
-  margin: calc(var(--grip) / -2) 0 0 calc(var(--grip) / -2);
+  translate: -50% -50%;
 }
 .compare__grip {
   background: var(--accent);

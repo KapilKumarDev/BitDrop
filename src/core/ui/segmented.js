@@ -15,8 +15,8 @@ export const mountSegmented = (el, options, value, onChange) => {
         name: el.id,
         value: index,
         checked: String(option.value) === String(value),
+        className: 'visually-hidden',
       });
-      input.className = 'visually-hidden';
       const label = document.createElement('span');
       label.textContent = option.label;
       seg.append(input, label);

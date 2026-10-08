@@ -9,7 +9,8 @@ const ui = ids();
 const normalize = async (picked) => {
   const bitmap = await createImageBitmap(picked);
   const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
-  const canvas = createCanvas(...[bitmap.width, bitmap.height].map((side) => Math.max(1, Math.round(side * scale))));
+  const fit = (side) => Math.max(1, Math.round(side * scale));
+  const canvas = createCanvas(fit(bitmap.width), fit(bitmap.height));
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);

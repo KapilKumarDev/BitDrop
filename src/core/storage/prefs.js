@@ -5,9 +5,11 @@ import { DEFAULT_PALETTE, PALETTES } from '../theme/palettes.js';
 const KEY = 'art8:prefs';
 export const DEFAULT_PREFS = { palette: DEFAULT_PALETTE, mode: 'system', level: 8, dither: false };
 
+const isKeyOf = (table) => (value) => typeof value === 'string' && Object.hasOwn(table, value);
+
 const IS_VALID = {
-  palette: (value) => typeof value === 'string' && Object.hasOwn(PALETTES, value),
-  mode: (value) => typeof value === 'string' && Object.hasOwn(MODES, value),
+  palette: isKeyOf(PALETTES),
+  mode: isKeyOf(MODES),
   level: (value) => Number.isInteger(value) && Object.hasOwn(BIT_LEVELS, value),
   dither: (value) => typeof value === 'boolean',
 };

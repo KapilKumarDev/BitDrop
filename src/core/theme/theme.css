@@ -36,7 +36,7 @@
   --radius-full: 999px;
   --target: 48px; /* minimum touch target */
   --target-lg: 56px;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: system-ui, sans-serif;
 }
 :root[data-mode="light"] {
   color-scheme: light;
