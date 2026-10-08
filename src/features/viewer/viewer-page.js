@@ -69,8 +69,11 @@ const start = async () => {
     show();
   });
   ui.zoom.addEventListener('click', () => {
-    const showingOriginal = ui.stage.dataset.view === 'original';
-    openImageModal(showingOriginal ? originalUrl : fullSizeCanvas().toDataURL(), showingOriginal ? 'Original image' : 'Pixel art version');
+    const [url, label] =
+      ui.stage.dataset.view === 'original'
+        ? [originalUrl, 'Original image']
+        : [fullSizeCanvas().toDataURL(), 'Pixel art version'];
+    openImageModal(url, label);
   });
   ui.export.addEventListener('click', () =>
     downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`).catch(() => report('The image could not be exported. Try again.')),

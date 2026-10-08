@@ -180,10 +180,7 @@ const paletteColor = (page, name) =>
 
 test('a stored theme is already applied before the page scripts run (no flash)', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('art8:prefs', JSON.stringify({ palette: 'rose', mode: 'dark' })));
-  let release;
-  const gate = new Promise((resolve) => {
-    release = resolve;
-  });
+  const { promise: gate, resolve: release } = Promise.withResolvers();
   await page.route('**/input-page.js', async (route) => {
     await gate;
     await route.continue();
@@ -229,10 +226,11 @@ test('dithering is off by default and the toggle changes the image', async ({ pa
   await expect(dither).toHaveAttribute('aria-pressed', 'true');
   expect(await page.locator('#art').getAttribute('src')).not.toBe(plain);
 });
+
 test('a choice group is one tab stop and arrow keys move the choice', async ({ page }) => {
   await openViewer(page);
   const levels = group(page, 'Bit level');
-  await levels.getByRole('radio', { checked: true }).focus();
+  await checked(page, 'Bit level').focus();
   await page.keyboard.press('ArrowRight');
   await expect(checked(page, 'Bit level')).toHaveAccessibleName('10-bit');
   await expect(page.locator('#tag')).toHaveText('10-bit');

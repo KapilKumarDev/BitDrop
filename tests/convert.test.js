@@ -3,6 +3,21 @@ import test from 'node:test';
 import { BIT_LEVELS } from '../src/core/levels/levels.js';
 import { bayer, convert, enhance, pixelate, quantizeChannel, quantizeImage } from '../src/features/convert/convert.js';
 
+/** Opaque gray image whose value in column x is valueAt(x). */
+const gray = (width, height, valueAt) => {
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < width * height; i++) {
+    const v = valueAt(i % width);
+    data.set([v, v, v, 255], i * 4);
+  }
+  return { width, height, data };
+};
+const ramp = () => gray(16, 8, (x) => x * 17);
+const distinctReds = (img) => new Set(img.data.filter((_, i) => i % 4 === 0)).size;
+/** Distinct red values in each column of an image. */
+const distinctPerColumn = ({ width, height, data }) =>
+  Array.from({ length: width }, (_, x) => new Set(Array.from({ length: height }, (_, y) => data[(y * width + x) * 4])).size);
+
 test('quantizeChannel keeps black and white at any depth', () => {
   assert.equal(quantizeChannel(0, 3), 0);
   assert.equal(quantizeChannel(255, 3), 255);
@@ -52,32 +67,17 @@ test('bayer thresholds are 16 distinct values centred on zero', () => {
   assert.equal(bayer(0, 0), bayer(4, 4));
 });
 
-const grid = (width, height, valueAt) => {
-  const data = new Uint8ClampedArray(width * height * 4);
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) data.set([valueAt(x), valueAt(x), valueAt(x), 255], (y * width + x) * 4);
-  }
-  return { width, height, data };
-};
-const reds = (img) => img.data.filter((_, i) => i % 4 === 0);
-/** Distinct red values in each column of an image. */
-const distinctPerColumn = ({ width, height, data }) =>
-  Array.from({ length: width }, (_, x) => new Set(Array.from({ length: height }, (_, y) => data[(y * width + x) * 4])).size);
-
 test('dithering mixes two levels across a gradient', () => {
-  const ramp = grid(16, 8, (x) => x * 17);
-  assert.equal(distinctPerColumn(quantizeImage(ramp, [1, 1, 1], { dither: false }))[7], 1);
-  assert.equal(distinctPerColumn(quantizeImage(ramp, [1, 1, 1], { dither: true }))[7], 2);
+  assert.equal(distinctPerColumn(quantizeImage(ramp(), [1, 1, 1], { dither: false }))[7], 1);
+  assert.equal(distinctPerColumn(quantizeImage(ramp(), [1, 1, 1], { dither: true }))[7], 2);
 });
 
 test('a solid color stays one solid color even between palette levels', () => {
-  const solid = grid(8, 8, () => 128);
-  assert.equal(new Set(reds(quantizeImage(solid, [1, 1, 1], { dither: true }))).size, 1);
+  assert.equal(distinctReds(quantizeImage(gray(8, 8, () => 128), [1, 1, 1], { dither: true })), 1);
 });
 
 test('solid color with slight jpeg-style noise still stays solid', () => {
-  const noisy = grid(8, 8, (x) => 128 + (x % 2));
-  assert.equal(new Set(reds(quantizeImage(noisy, [1, 1, 1], { dither: true }))).size, 1);
+  assert.equal(distinctReds(quantizeImage(gray(8, 8, (x) => 128 + (x % 2)), [1, 1, 1], { dither: true })), 1);
 });
 
 test('enhance boosts saturation but leaves grays and alpha alone', () => {
@@ -113,13 +113,12 @@ test('every bit level uses its own depth, capped at 24-bit color, with a growing
 });
 
 test('nothing is dithered unless asked for', () => {
-  const ramp = grid(16, 8, (x) => x * 17);
-  assert.ok(distinctPerColumn(quantizeImage(ramp, [1, 1, 1])).every((n) => n === 1));
+  assert.ok(distinctPerColumn(quantizeImage(ramp(), [1, 1, 1])).every((n) => n === 1));
 });
 
 test('convert passes the dither option through', () => {
-  const ramp = grid(64, 8, (x) => x * 4);
+  const gradient = gray(64, 8, (x) => x * 4);
   const mixedColumns = (img) => distinctPerColumn(img).filter((n) => n > 1).length;
-  assert.equal(mixedColumns(convert(ramp, 8)), 0);
-  assert.ok(mixedColumns(convert(ramp, 8, { dither: true })) > 0);
+  assert.equal(mixedColumns(convert(gradient, 8)), 0);
+  assert.ok(mixedColumns(convert(gradient, 8, { dither: true })) > 0);
 });

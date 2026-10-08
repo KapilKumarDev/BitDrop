@@ -8,10 +8,12 @@ import { mountSegmented } from '../../core/ui/segmented.js';
 const ui = ids();
 const prefs = loadPrefs();
 const optionsOf = (labels) => Object.entries(labels).map(([value, label]) => ({ value, label }));
+const mount = (root, options, key) =>
+  mountSegmented(root, options, prefs[key], (value) => savePrefs({ [key]: value }));
 
-mountSegmented(ui.palette, optionsOf(PALETTES), prefs.palette, (palette) => savePrefs({ palette }));
-mountSegmented(ui.mode, optionsOf(MODES), prefs.mode, (mode) => savePrefs({ mode }));
-mountSegmented(ui.level, LEVEL_OPTIONS, prefs.level, (level) => savePrefs({ level }));
+mount(ui.palette, optionsOf(PALETTES), 'palette');
+mount(ui.mode, optionsOf(MODES), 'mode');
+mount(ui.level, LEVEL_OPTIONS, 'level');
 
 // Swatches are the same radio group, drawn in their own palette color with the name kept for screen readers.
 for (const swatch of ui.palette.children) {
