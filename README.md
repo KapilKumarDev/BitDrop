@@ -7,6 +7,9 @@ Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only depe
 - Logic tests: `npm test` (Node's built-in runner, `tests/*.test.js`)
 - Browser tests: `npm install`, then once `npx playwright install chromium`, then `npm run test:e2e` (`tests/e2e/`, mobile viewport, starts `npm start` itself or reuses a server already on port 3000). `npm run test:browsers` runs the same tests in Firefox and WebKit and first installs those two browsers itself (a no-op once they are there); without them every test fails at launch. Controls are found by role and accessible name, the way a keyboard or screen-reader user finds them.
 
+## Try it
+[BitDrop](https://bitdrop.kapilk.workers.dev/)
+
 ## Pages
 
 `index.html` (pick an image), `viewer.html` (convert, compare, zoom, export), `settings.html` (theme, appearance, default level). The picked image travels to the viewer as lossless PNG bytes in IndexedDB (bytes rather than a Blob, which WebKit cannot store in private sessions).
