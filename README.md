@@ -1,14 +1,14 @@
 # 8-bit Art Maker
 
-Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only dependencies are dev tools for serving and browser tests (Node 20.11 or later).
+Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only dependencies are dev tools for serving and browser tests (Node 26.10 or later, as in `package.json`).
 
-- Run: `npm start` (any static server works; ES modules need http, not file://)
+- Run: `npm start` (serves on port 3000; any static server works, ES modules need http, not file://)
 - Logic tests: `npm test` (Node's built-in runner, `tests/*.test.js`)
-- Browser tests: `npm install`, then once `npx playwright install chromium`, then `npm run test:e2e` (`tests/e2e/`, mobile viewport, starts its own server on port 3000 or reuses one already running). Controls are found by role and accessible name, the way a keyboard or screen-reader user finds them.
+- Browser tests: `npm install`, then once `npx playwright install chromium`, then `npm run test:e2e` (`tests/e2e/`, mobile viewport, starts `npm start` itself or reuses a server already on port 3000). `npm run test:browsers` runs the same tests in Firefox and WebKit and first installs those two browsers itself (a no-op once they are there); without them every test fails at launch. Controls are found by role and accessible name, the way a keyboard or screen-reader user finds them.
 
 ## Pages
 
-`index.html` (pick an image), `viewer.html` (convert, compare, zoom, export), `settings.html` (theme, appearance, default level). The picked image travels to the viewer as a lossless PNG Blob in IndexedDB.
+`index.html` (pick an image), `viewer.html` (convert, compare, zoom, export), `settings.html` (theme, appearance, default level). The picked image travels to the viewer as lossless PNG bytes in IndexedDB (bytes rather than a Blob, which WebKit cannot store in private sessions).
 
 ## Structure (by feature)
 

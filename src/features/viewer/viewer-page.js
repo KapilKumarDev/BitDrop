@@ -1,4 +1,4 @@
-import { downloadCanvas } from '../../core/canvas/canvas.js';
+import { downloadCanvas, toDataUrl } from '../../core/canvas/canvas.js';
 import { BIT_LEVELS, LEVEL_OPTIONS } from '../../core/levels/levels.js';
 import { loadImage } from '../../core/storage/image-store.js';
 import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
@@ -31,7 +31,7 @@ const start = async () => {
     return;
   }
   const pixels = await loadPixels(source);
-  const originalUrl = URL.createObjectURL(source);
+  const originalUrl = await toDataUrl(source);
   const cache = new Map();
   const artFor = (level, dither) => {
     const key = `${level}:${dither}`;
@@ -71,7 +71,7 @@ const start = async () => {
   ui.zoom.addEventListener('click', () => {
     const [url, label] =
       ui.stage.dataset.view === 'original' ? [originalUrl, 'Original image'] : [fullSizeCanvas().toDataURL(), 'Pixel art version'];
-    openImageModal(url, label);
+    openImageModal(url, label, ui.zoom);
   });
   ui.export.addEventListener('click', () =>
     downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`).catch(() => report('The image could not be exported. Try again.')),

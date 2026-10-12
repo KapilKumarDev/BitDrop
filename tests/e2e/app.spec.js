@@ -2,7 +2,17 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const SAMPLE = path.join(import.meta.dirname, 'fixtures', 'sample.png');
+// Handed over as bytes, not a path: WebKit intermittently fails to read a path-backed upload (NotFoundError).
+const SAMPLE = {
+  name: 'sample.png',
+  mimeType: 'image/png',
+  buffer: await readFile(path.join(import.meta.dirname, 'fixtures', 'sample.png')),
+};
+
+// Browser console errors are printed in the test output, so a failure in one engine shows its cause.
+test.beforeEach(({ page }) => {
+  page.on('console', (message) => message.type() === 'error' && console.log(`[browser] ${message.text()}`));
+});
 
 const group = (page, name) => page.getByRole('radiogroup', { name });
 const choose = (page, groupName, label) =>
@@ -38,12 +48,17 @@ test('input page rejects a file that is not an image', async ({ page }) => {
 
 test('keyboard alone reaches the file picker, shows focus, and opens it', async ({ page }) => {
   await page.goto('/');
-  await page.keyboard.press('Tab'); // Settings link
-  await page.keyboard.press('Tab');
-  await expect(page.locator('#file')).toBeFocused();
+  const file = page.locator('#file');
+  // Safari does not put links in the Tab order by default, so the Settings link may or may not come first.
+  for (let i = 0; i < 3 && !(await file.evaluate((el) => el === document.activeElement)); i++) {
+    await page.keyboard.press('Tab');
+  }
+  await expect(file).toBeFocused();
   await expect(page.locator('.drop__card')).toHaveCSS('outline-style', 'solid');
-  const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Enter')]);
-  expect(chooser.isMultiple()).toBe(false);
+  const chooser = page.waitForEvent('filechooser');
+  await page.evaluate(() => 0); // round trip: Playwright must be listening before Enter, or a fast press opens a chooser it never reports
+  await page.keyboard.press('Enter');
+  expect((await chooser).isMultiple()).toBe(false);
 });
 
 test('viewer without an image sends you back to the input page', async ({ page }) => {

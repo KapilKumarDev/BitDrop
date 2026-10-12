@@ -1,4 +1,4 @@
-import { createCanvas, toBlob } from '../../core/canvas/canvas.js';
+import { createCanvas, decodeImage, toBlob } from '../../core/canvas/canvas.js';
 import { saveImage } from '../../core/storage/image-store.js';
 import { ids, report } from '../../core/ui/dom.js';
 
@@ -7,15 +7,14 @@ const ui = ids();
 
 /** Decodes the file, shrinks it to MAX_SIDE and flattens transparency onto white; returns a lossless PNG Blob. */
 const normalize = async (picked) => {
-  const bitmap = await createImageBitmap(picked);
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+  const image = await decodeImage(picked);
+  const scale = Math.min(1, MAX_SIDE / Math.max(image.naturalWidth, image.naturalHeight));
   const fit = (side) => Math.max(1, Math.round(side * scale));
-  const canvas = createCanvas(fit(bitmap.width), fit(bitmap.height));
+  const canvas = createCanvas(fit(image.naturalWidth), fit(image.naturalHeight));
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
   return toBlob(canvas);
 };
 
@@ -27,13 +26,15 @@ const accept = async (picked) => {
   let image;
   try {
     image = await normalize(picked);
-  } catch {
+  } catch (error) {
+    console.error('Decoding the picked image failed:', error.name, error.message);
     report('This image could not be opened. Try a different one.');
     return;
   }
   try {
     await saveImage(image);
-  } catch {
+  } catch (error) {
+    console.error('Storing the image failed:', error.name, error.message);
     report('The browser would not keep the image for the next page. Check that storage is not full or blocked, then try again.');
     return;
   }

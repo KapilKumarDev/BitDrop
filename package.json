@@ -8,14 +8,15 @@
   },
   "scripts": {
     "test": "node --test",
-    "start": "serve .",
+    "start": "sirv . --dev --port 3000",
     "test:e2e": "playwright test --project=chromium",
     "check": "biome check .",
+    "pretest:browsers": "playwright install firefox webkit",
     "test:browsers": "playwright test --project=firefox --project=webkit"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
     "@playwright/test": "^1.63.0",
-    "serve": "^14.2.6"
+    "sirv-cli": "^3.0.1"
   }
 }

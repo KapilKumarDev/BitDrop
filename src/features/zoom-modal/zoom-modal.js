@@ -10,10 +10,11 @@ const TEMPLATE = `
   </div>`;
 
 /**
- * Full-screen native <dialog> for one image: the browser inerts the page behind it, keeps Tab inside, closes on
- * Escape and returns focus to the opener. Back and a click outside the image close it; wheel and pinch zoom, drag pans.
+ * Full-screen native <dialog> for one image: the browser inerts the page behind it, keeps Tab inside and closes on
+ * Escape. Back and a click outside the image close it; wheel and pinch zoom, drag pans. Focus goes back to `opener`
+ * explicitly: Safari does not focus a button when it is clicked, so the dialog would have nothing to return to.
  */
-export const openImageModal = (src, alt) => {
+export const openImageModal = (src, alt, opener) => {
   const dialog = document.createElement('dialog');
   dialog.className = 'modal';
   dialog.setAttribute('aria-label', alt);
@@ -46,7 +47,10 @@ export const openImageModal = (src, alt) => {
     pinch = 0;
   };
 
-  dialog.addEventListener('close', () => dialog.remove());
+  dialog.addEventListener('close', () => {
+    dialog.remove();
+    opener.focus();
+  });
   dialog.addEventListener('click', (event) => {
     const act = event.target.closest('[data-act]')?.dataset.act;
     if (act === 'back' || event.target === stage || event.target === dialog) dialog.close();

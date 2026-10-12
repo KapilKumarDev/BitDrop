@@ -15,7 +15,7 @@ export default defineConfig({
     { name: 'webkit', use: devices['iPhone 14'] },
   ],
   webServer: {
-    command: 'npm start -- -l 3000',
+    command: 'npm start',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
   },
