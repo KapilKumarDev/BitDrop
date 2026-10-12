@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { splitFromPointer, stepSplit } from '../src/features/compare/compare.js';
+import { splitFromPointer, stepSplit } from '../public/src/features/compare/compare.js';
 
 test('splitFromPointer maps a pointer x to a percentage of the stage width', () => {
   assert.equal(splitFromPointer(150, 100, 200), 25);

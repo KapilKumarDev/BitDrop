@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BIT_LEVELS } from '../src/core/levels/levels.js';
-import { bayer, convert, enhance, pixelate, quantizeChannel, quantizeImage } from '../src/features/convert/convert.js';
+import { BIT_LEVELS } from '../public/src/core/levels/levels.js';
+import { bayer, convert, enhance, pixelate, quantizeChannel, quantizeImage } from '../public/src/features/convert/convert.js';
 
 /** Opaque gray image whose value in column x is valueAt(x). */
 const gray = (width, height, valueAt) => {

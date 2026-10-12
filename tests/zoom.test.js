@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { clampZoom, MAX_ZOOM, MIN_ZOOM, stepZoom } from '../src/features/zoom-modal/zoom.js';
+import { clampZoom, MAX_ZOOM, MIN_ZOOM, stepZoom } from '../public/src/features/zoom-modal/zoom.js';
 
 test('clampZoom stays inside bounds', () => {
   assert.equal(clampZoom(0.1), MIN_ZOOM);

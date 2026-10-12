@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import { DEFAULT_PREFS } from '../src/core/storage/prefs.js';
-import { PALETTES } from '../src/core/theme/palettes.js';
+import { DEFAULT_PREFS } from '../public/src/core/storage/prefs.js';
+import { PALETTES } from '../public/src/core/theme/palettes.js';
 
-const css = readFileSync(new URL('../src/core/theme/theme.css', import.meta.url), 'utf8');
+const css = readFileSync(new URL('../public/src/core/theme/theme.css', import.meta.url), 'utf8');
 
 const toLinear = (c) => {
   const s = c / 255;

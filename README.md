@@ -2,6 +2,7 @@
 
 Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only dependencies are dev tools for serving and browser tests (Node 26.10 or later, as in `package.json`).
 
+- Deploy: static, no build step. Publish the `public/` folder (Cloudflare Pages: build command empty, output directory `public`).
 - Run: `npm start` (serves on port 3000; any static server works, ES modules need http, not file://)
 - Logic tests: `npm test` (Node's built-in runner, `tests/*.test.js`)
 - Browser tests: `npm install`, then once `npx playwright install chromium`, then `npm run test:e2e` (`tests/e2e/`, mobile viewport, starts `npm start` itself or reuses a server already on port 3000). `npm run test:browsers` runs the same tests in Firefox and WebKit and first installs those two browsers itself (a no-op once they are there); without them every test fails at launch. Controls are found by role and accessible name, the way a keyboard or screen-reader user finds them.
@@ -12,17 +13,17 @@ Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only depe
 
 ## Structure (by feature)
 
-- `src/core/` shared code: `theme/` (tokens, palettes, theme.js), `levels/` (bit levels), `storage/` (prefs, image handoff), `canvas/` (canvas helpers, PNG download), `ui/` (button, segmented radio group, `ids()`), `layout/` (page shell)
-- `src/features/` one folder per feature: `convert`, `compare`, `zoom-modal`, `input`, `viewer`, `settings`
+- `public/src/core/` shared code: `theme/` (tokens, palettes, theme.js), `levels/` (bit levels), `storage/` (prefs, image handoff), `canvas/` (canvas helpers, PNG download), `ui/` (button, segmented radio group, `ids()`), `layout/` (page shell)
+- `public/src/features/` one folder per feature: `convert`, `compare`, `zoom-modal`, `input`, `viewer`, `settings`
 - Features import from `core/` only. The exceptions are the page scripts that compose features: `viewer-page.js` uses `convert`, `compare` and `zoom-modal`.
 
 ## Bit levels
 
-4, 6, 8, 10, 12, 16, 24 and 32 (`src/core/levels/levels.js`). Color depth is the real RGB split (8-bit = 3-3-2, 10-bit = 3-4-3, 16-bit = 5-6-5, 24-bit = 8-8-8) and the pixel grid grows with the level (64 px at 8-bit, 256 px at 32-bit). Dithering is optional (off by default, toggle on the viewer) and skips flat areas.
+4, 6, 8, 10, 12, 16, 24 and 32 (`public/src/core/levels/levels.js`). Color depth is the real RGB split (8-bit = 3-3-2, 10-bit = 3-4-3, 16-bit = 5-6-5, 24-bit = 8-8-8) and the pixel grid grows with the level (64 px at 8-bit, 256 px at 32-bit). Dithering is optional (off by default, toggle on the viewer) and skips flat areas.
 
 ## Theme
 
-Only `--bg`/`--fg` change between light and dark, through `light-dark()`; with no stored choice the system setting decides, in pure CSS. Each accent is a fixed value in `theme.css` that keeps equal contrast against white and black (checked by `tests/theme.test.js`). `src/core/theme/theme.js` is a classic script in every page's `<head>`: it blocks the first paint so the stored choice is applied before anything is drawn. Stored preferences are validated on load; a bad value falls back to its default.
+Only `--bg`/`--fg` change between light and dark, through `light-dark()`; with no stored choice the system setting decides, in pure CSS. Each accent is a fixed value in `theme.css` that keeps equal contrast against white and black (checked by `tests/theme.test.js`). `public/src/core/theme/theme.js` is a classic script in every page's `<head>`: it blocks the first paint so the stored choice is applied before anything is drawn. Stored preferences are validated on load; a bad value falls back to its default.
 
 ## Accessibility
 

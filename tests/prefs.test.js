@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { LEVEL_OPTIONS } from '../src/core/levels/levels.js';
-import { DEFAULT_PREFS, loadPrefs } from '../src/core/storage/prefs.js';
+import { LEVEL_OPTIONS } from '../public/src/core/levels/levels.js';
+import { DEFAULT_PREFS, loadPrefs } from '../public/src/core/storage/prefs.js';
 
 const store = (raw) =>
   Object.defineProperty(globalThis, 'localStorage', {

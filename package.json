@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "node --test",
-    "start": "sirv . --dev --port 3000",
+    "start": "sirv public --dev --port 3000",
     "test:e2e": "playwright test --project=chromium",
     "check": "biome check .",
     "pretest:browsers": "playwright install firefox webkit",
