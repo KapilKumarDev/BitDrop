@@ -7,7 +7,13 @@
   min-height: 12rem;
   padding: 24px;
   cursor: pointer;
-  background: conic-gradient(var(--tint) 25%, var(--tint-strong) 0 50%, var(--tint) 0 75%, var(--tint-strong) 0) 0 0 / 32px 32px;
+  background: conic-gradient(
+      var(--tint) 25%,
+      var(--tint-strong) 0 50%,
+      var(--tint) 0 75%,
+      var(--tint-strong) 0
+    )
+    0 0 / 32px 32px;
 }
 .drop__card {
   display: grid;

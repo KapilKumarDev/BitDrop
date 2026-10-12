@@ -1,21 +1,21 @@
-import { downloadCanvas } from '../../core/canvas/canvas.js';
-import { BIT_LEVELS, LEVEL_OPTIONS } from '../../core/levels/levels.js';
-import { loadImage } from '../../core/storage/image-store.js';
-import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
-import { ids, report } from '../../core/ui/dom.js';
-import { mountSegmented } from '../../core/ui/segmented.js';
-import { mountCompare } from '../compare/compare-slider.js';
-import { convert } from '../convert/convert.js';
-import { loadPixels, toCanvas, upscale } from '../convert/render.js';
-import { openImageModal } from '../zoom-modal/zoom-modal.js';
+import { downloadCanvas } from "../../core/canvas/canvas.js";
+import { BIT_LEVELS, LEVEL_OPTIONS } from "../../core/levels/levels.js";
+import { loadImage } from "../../core/storage/image-store.js";
+import { loadPrefs, savePrefs } from "../../core/storage/prefs.js";
+import { ids, report } from "../../core/ui/dom.js";
+import { mountSegmented } from "../../core/ui/segmented.js";
+import { mountCompare } from "../compare/compare-slider.js";
+import { convert } from "../convert/convert.js";
+import { loadPixels, toCanvas, upscale } from "../convert/render.js";
+import { openImageModal } from "../zoom-modal/zoom-modal.js";
 
 const FULL_SIDE = 1024; // zoom and export render the grid at least this big; the stage shows the small grid
 const ui = ids();
 
 const VIEWS = [
-  { value: 'art', label: 'Pixel art' },
-  { value: 'original', label: 'Original' },
-  { value: 'compare', label: 'Compare' },
+  { value: "art", label: "Pixel art" },
+  { value: "original", label: "Original" },
+  { value: "compare", label: "Compare" },
 ];
 
 const start = async () => {
@@ -23,11 +23,13 @@ const start = async () => {
   try {
     source = await loadImage();
   } catch {
-    report('The browser could not read the stored image. Go back and choose it again.');
+    report(
+      "The browser could not read the stored image. Go back and choose it again.",
+    );
     return;
   }
   if (!source) {
-    location.replace('index.html');
+    location.replace("index.html");
     return;
   }
   const pixels = await loadPixels(source);
@@ -48,36 +50,40 @@ const start = async () => {
   const show = () => {
     ui.art.src = artFor(level, dither).url;
     ui.tag.textContent = BIT_LEVELS[level].label;
-    ui.dither.setAttribute('aria-pressed', String(dither));
+    ui.dither.setAttribute("aria-pressed", String(dither));
   };
 
   ui.original.src = originalUrl;
   show();
 
-  mountSegmented(ui.view, VIEWS, 'art', (view) => {
+  mountSegmented(ui.view, VIEWS, "art", (view) => {
     ui.stage.dataset.view = view;
-    ui.compare.hidden = view !== 'compare';
-    if (view === 'compare') slider.sweepIn();
+    ui.compare.hidden = view !== "compare";
+    if (view === "compare") slider.sweepIn();
   });
   mountSegmented(ui.levels, LEVEL_OPTIONS, level, (value) => {
     level = value;
     show();
   });
-  ui.dither.addEventListener('click', () => {
+  ui.dither.addEventListener("click", () => {
     dither = !dither;
     savePrefs({ dither });
     show();
   });
-  ui.zoom.addEventListener('click', () => {
+  ui.zoom.addEventListener("click", () => {
     const [url, label] =
-      ui.stage.dataset.view === 'original'
-        ? [originalUrl, 'Original image']
-        : [fullSizeCanvas().toDataURL(), 'Pixel art version'];
+      ui.stage.dataset.view === "original"
+        ? [originalUrl, "Original image"]
+        : [fullSizeCanvas().toDataURL(), "Pixel art version"];
     openImageModal(url, label);
   });
-  ui.export.addEventListener('click', () =>
-    downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`).catch(() => report('The image could not be exported. Try again.')),
+  ui.export.addEventListener("click", () =>
+    downloadCanvas(fullSizeCanvas(), `pixel-art-${level}bit.png`).catch(() =>
+      report("The image could not be exported. Try again."),
+    ),
   );
 };
 
-start().catch(() => report('This image could not be shown. Go back and choose another one.'));
+start().catch(() =>
+  report("This image could not be shown. Go back and choose another one."),
+);

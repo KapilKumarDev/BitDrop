@@ -8,7 +8,8 @@
   border: 0;
   color: var(--fg);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .modal[open] {
   display: flex;
@@ -31,7 +32,8 @@
   object-fit: contain;
   image-rendering: pixelated;
   cursor: grab;
-  transform: translate(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px)) scale(var(--zoom, 1));
+  transform: translate(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px))
+    scale(var(--zoom, 1));
 }
 .modal__bar {
   display: flex;

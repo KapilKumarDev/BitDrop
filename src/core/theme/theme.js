@@ -5,15 +5,18 @@
   const apply = () => {
     let prefs = null;
     try {
-      prefs = JSON.parse(localStorage.getItem('art8:prefs'));
+      prefs = JSON.parse(localStorage.getItem("art8:prefs"));
     } catch {
       /* storage unavailable: the CSS defaults apply */
     }
-    Object.assign(document.documentElement.dataset, { mode: prefs?.mode ?? '', palette: prefs?.palette ?? '' });
+    Object.assign(document.documentElement.dataset, {
+      mode: prefs?.mode ?? "",
+      palette: prefs?.palette ?? "",
+    });
   };
 
   apply();
-  addEventListener('prefschange', apply); // same tab: raised by savePrefs
-  addEventListener('storage', apply); // other tabs
-  addEventListener('pageshow', (event) => event.persisted && apply()); // a bfcache restore runs no scripts
+  addEventListener("prefschange", apply); // same tab: raised by savePrefs
+  addEventListener("storage", apply); // other tabs
+  addEventListener("pageshow", (event) => event.persisted && apply()); // a bfcache restore runs no scripts
 })();

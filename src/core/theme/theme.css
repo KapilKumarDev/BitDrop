@@ -28,7 +28,11 @@
   --on-accent: #fff;
   --tint: color-mix(in srgb, var(--accent) 14%, var(--bg));
   --tint-strong: color-mix(in srgb, var(--accent) 30%, var(--bg));
-  --tone: color-mix(in srgb, var(--accent) 15%, color-mix(in srgb, var(--fg) 55%, var(--bg)));
+  --tone: color-mix(
+    in srgb,
+    var(--accent) 15%,
+    color-mix(in srgb, var(--fg) 55%, var(--bg))
+  );
   --shade: color-mix(in srgb, var(--accent) 72%, #000);
   --surface: color-mix(in srgb, var(--fg) 6%, var(--bg));
   --outline: color-mix(in srgb, var(--fg) 26%, var(--bg));
