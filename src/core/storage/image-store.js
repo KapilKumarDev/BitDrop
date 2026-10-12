@@ -1,8 +1,8 @@
 // The picked image travels from the input page to the viewer as a Blob in IndexedDB: lossless (no re-encoding
 // noise) and without sessionStorage's ~5 MB string quota.
-const DB = "art8",
-  STORE = "image",
-  KEY = "current";
+const DB = 'art8',
+  STORE = 'image',
+  KEY = 'current';
 
 const run = async (mode, operation) => {
   const db = await new Promise((resolve, reject) => {
@@ -24,6 +24,5 @@ const run = async (mode, operation) => {
 };
 
 /** Both reject when storage is unavailable or full; callers report it. loadImage resolves undefined when nothing is stored. */
-export const saveImage = (blob) =>
-  run("readwrite", (store) => store.put(blob, KEY));
-export const loadImage = () => run("readonly", (store) => store.get(KEY));
+export const saveImage = (blob) => run('readwrite', (store) => store.put(blob, KEY));
+export const loadImage = () => run('readonly', (store) => store.get(KEY));

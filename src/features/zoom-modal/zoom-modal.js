@@ -1,4 +1,4 @@
-import { clampZoom, MIN_ZOOM, stepZoom } from "./zoom.js";
+import { clampZoom, MIN_ZOOM, stepZoom } from './zoom.js';
 
 const TEMPLATE = `
   <div class="modal__stage"><img class="modal__img" draggable="false"></div>
@@ -14,16 +14,16 @@ const TEMPLATE = `
  * Escape and returns focus to the opener. Back and a click outside the image close it; wheel and pinch zoom, drag pans.
  */
 export const openImageModal = (src, alt) => {
-  const dialog = document.createElement("dialog");
-  dialog.className = "modal";
-  dialog.setAttribute("aria-label", alt);
+  const dialog = document.createElement('dialog');
+  dialog.className = 'modal';
+  dialog.setAttribute('aria-label', alt);
   dialog.innerHTML = TEMPLATE;
-  const stage = dialog.querySelector(".modal__stage");
-  const image = Object.assign(dialog.querySelector(".modal__img"), {
+  const stage = dialog.querySelector('.modal__stage');
+  const image = Object.assign(dialog.querySelector('.modal__img'), {
     src,
     alt,
   });
-  const level = dialog.querySelector(".modal__level");
+  const level = dialog.querySelector('.modal__level');
 
   let zoom = MIN_ZOOM;
   let [x, y] = [0, 0];
@@ -31,9 +31,9 @@ export const openImageModal = (src, alt) => {
   const pointers = new Map();
 
   const render = () => {
-    dialog.style.setProperty("--zoom", zoom);
-    dialog.style.setProperty("--x", x);
-    dialog.style.setProperty("--y", y);
+    dialog.style.setProperty('--zoom', zoom);
+    dialog.style.setProperty('--x', x);
+    dialog.style.setProperty('--y', y);
     level.textContent = `${Math.round(zoom * 100)}%`;
   };
   const setZoom = (next) => {
@@ -46,28 +46,27 @@ export const openImageModal = (src, alt) => {
     pinch = 0;
   };
 
-  dialog.addEventListener("close", () => dialog.remove());
-  dialog.addEventListener("click", (event) => {
-    const act = event.target.closest("[data-act]")?.dataset.act;
-    if (act === "back" || event.target === stage || event.target === dialog)
-      dialog.close();
-    else if (act === "in") setZoom(stepZoom(zoom, 1));
-    else if (act === "out") setZoom(stepZoom(zoom, -1));
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.addEventListener('click', (event) => {
+    const act = event.target.closest('[data-act]')?.dataset.act;
+    if (act === 'back' || event.target === stage || event.target === dialog) dialog.close();
+    else if (act === 'in') setZoom(stepZoom(zoom, 1));
+    else if (act === 'out') setZoom(stepZoom(zoom, -1));
   });
   stage.addEventListener(
-    "wheel",
+    'wheel',
     (event) => {
       event.preventDefault();
       setZoom(stepZoom(zoom, -Math.sign(event.deltaY)));
     },
     { passive: false },
   );
-  image.addEventListener("pointerdown", (event) => {
+  image.addEventListener('pointerdown', (event) => {
     pointers.set(event.pointerId, event);
     pinch = 0;
     image.setPointerCapture(event.pointerId);
   });
-  image.addEventListener("pointermove", (event) => {
+  image.addEventListener('pointermove', (event) => {
     const last = pointers.get(event.pointerId);
     if (!last) return;
     pointers.set(event.pointerId, event);
@@ -82,8 +81,8 @@ export const openImageModal = (src, alt) => {
       render();
     }
   });
-  image.addEventListener("pointerup", release);
-  image.addEventListener("pointercancel", release);
+  image.addEventListener('pointerup', release);
+  image.addEventListener('pointercancel', release);
 
   document.body.append(dialog);
   dialog.showModal();
