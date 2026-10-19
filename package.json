@@ -11,6 +11,7 @@
     "start": "sirv public --dev --port 3000",
     "test:e2e": "playwright test --project=chromium",
     "check": "biome check .",
+    "fix": "biome check --write .",
     "pretest:browsers": "playwright install firefox webkit",
     "test:browsers": "playwright test --project=firefox --project=webkit"
   },

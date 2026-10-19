@@ -2,8 +2,9 @@
 
 Turns a picture into pixel art at 4 to 32 bit levels. Static site; the only dependencies are dev tools for serving and browser tests (Node 26.10 or later, as in `package.json`).
 
-- Deploy: static, no build step. Publish the `public/` folder (Cloudflare Pages: build command empty, output directory `public`).
+- Deploy: static, no build step. Cloudflare Workers Builds redeploys on every git push and serves the `public/` folder through the `assets` setting in `wrangler.jsonc`; the Node version it builds with comes from `.node-version`.
 - Run: `npm start` (serves on port 3000; any static server works, ES modules need http, not file://)
+- Lint and format: `npm run check` only reports problems; `npm run fix` applies the fixes Biome can make safely (formatting, import order, safe lint fixes) and leaves the rest to report.
 - Logic tests: `npm test` (Node's built-in runner, `tests/*.test.js`)
 - Browser tests: `npm install`, then once `npx playwright install chromium`, then `npm run test:e2e` (`tests/e2e/`, mobile viewport, starts `npm start` itself or reuses a server already on port 3000). `npm run test:browsers` runs the same tests in Firefox and WebKit and first installs those two browsers itself (a no-op once they are there); without them every test fails at launch. Controls are found by role and accessible name, the way a keyboard or screen-reader user finds them.
 

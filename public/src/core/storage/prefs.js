@@ -2,7 +2,7 @@ import { BIT_LEVELS } from '../levels/levels.js';
 import { MODES } from '../theme/modes.js';
 import { DEFAULT_PALETTE, PALETTES } from '../theme/palettes.js';
 
-const KEY = 'art8:prefs';
+export const PREFS_KEY = 'art8:prefs'; // theme.js, a classic script that cannot import this, repeats it; tests/theme.test.js keeps them equal
 export const DEFAULT_PREFS = {
   palette: DEFAULT_PALETTE,
   mode: 'system',
@@ -25,7 +25,7 @@ const sanitize = (stored) =>
 
 const read = () => {
   try {
-    return JSON.parse(localStorage.getItem(KEY));
+    return JSON.parse(localStorage.getItem(PREFS_KEY));
   } catch {
     return null; // unreadable or unavailable storage: sanitize turns this into the defaults
   }
@@ -36,7 +36,7 @@ export const loadPrefs = () => sanitize(read());
 export const savePrefs = (patch) => {
   const next = { ...loadPrefs(), ...patch };
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
   } catch {
     /* storage unavailable: the choice still applies for this page view */
   }

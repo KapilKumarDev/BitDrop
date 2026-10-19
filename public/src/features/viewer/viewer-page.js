@@ -1,4 +1,4 @@
-import { downloadCanvas, toDataUrl } from '../../core/canvas/canvas.js';
+import { decodeImage, downloadCanvas } from '../../core/canvas/canvas.js';
 import { BIT_LEVELS, LEVEL_OPTIONS } from '../../core/levels/levels.js';
 import { loadImage } from '../../core/storage/image-store.js';
 import { loadPrefs, savePrefs } from '../../core/storage/prefs.js';
@@ -6,7 +6,7 @@ import { ids, report } from '../../core/ui/dom.js';
 import { mountSegmented } from '../../core/ui/segmented.js';
 import { mountCompare } from '../compare/compare-slider.js';
 import { convert } from '../convert/convert.js';
-import { loadPixels, toCanvas, upscale } from '../convert/render.js';
+import { readPixels, toCanvas, upscale } from '../convert/render.js';
 import { openImageModal } from '../zoom-modal/zoom-modal.js';
 
 const FULL_SIDE = 1024; // zoom and export render the grid at least this big; the stage shows the small grid
@@ -30,8 +30,8 @@ const start = async () => {
     location.replace('index.html');
     return;
   }
-  const pixels = await loadPixels(source);
-  const originalUrl = await toDataUrl(source);
+  const original = await decodeImage(source);
+  const pixels = readPixels(original);
   const cache = new Map();
   const artFor = (level, dither) => {
     const key = `${level}:${dither}`;
@@ -51,7 +51,7 @@ const start = async () => {
     ui.dither.setAttribute('aria-pressed', String(dither));
   };
 
-  ui.original.src = originalUrl;
+  ui.original.src = original.src;
   show();
 
   mountSegmented(ui.view, VIEWS, 'art', (view) => {
@@ -70,7 +70,7 @@ const start = async () => {
   });
   ui.zoom.addEventListener('click', () => {
     const [url, label] =
-      ui.stage.dataset.view === 'original' ? [originalUrl, 'Original image'] : [fullSizeCanvas().toDataURL(), 'Pixel art version'];
+      ui.stage.dataset.view === 'original' ? [original.src, 'Original image'] : [fullSizeCanvas().toDataURL(), 'Pixel art version'];
     openImageModal(url, label, ui.zoom);
   });
   ui.export.addEventListener('click', () =>

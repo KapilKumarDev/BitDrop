@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import { DEFAULT_PREFS } from '../public/src/core/storage/prefs.js';
+import { DEFAULT_PREFS, PREFS_KEY } from '../public/src/core/storage/prefs.js';
 import { PALETTES } from '../public/src/core/theme/palettes.js';
 
 const css = readFileSync(new URL('../public/src/core/theme/theme.css', import.meta.url), 'utf8');
+const themeScript = readFileSync(new URL('../public/src/core/theme/theme.js', import.meta.url), 'utf8');
 
 const toLinear = (c) => {
   const s = c / 255;
@@ -25,6 +26,10 @@ const accents = Object.fromEntries(
 
 test('contrast of black on white is 21', () => {
   assert.equal(Math.round(contrast('#000000', '#ffffff')), 21);
+});
+
+test('theme.js reads the same storage key prefs.js writes', () => {
+  assert.ok(themeScript.includes(`getItem('${PREFS_KEY}')`));
 });
 
 test('theme.css defines exactly the palettes the settings page offers', () => {

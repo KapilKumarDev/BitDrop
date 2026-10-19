@@ -1,8 +1,7 @@
-import { createCanvas, decodeImage } from '../../core/canvas/canvas.js';
+import { createCanvas } from '../../core/canvas/canvas.js';
 
-/** Decodes an image Blob into RGBA pixels. */
-export const loadPixels = async (blob) => {
-  const image = await decodeImage(blob);
+/** Reads the RGBA pixels of a decoded image. */
+export const readPixels = (image) => {
   const { naturalWidth: width, naturalHeight: height } = image;
   const ctx = createCanvas(width, height).getContext('2d');
   ctx.drawImage(image, 0, 0);

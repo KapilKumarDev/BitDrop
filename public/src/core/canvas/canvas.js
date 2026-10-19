@@ -17,7 +17,7 @@ export const downloadCanvas = async (canvas, name) => {
 };
 
 /** Reads a Blob as a data: URL. Unlike a blob: URL it loads in every engine, including WebKit's ephemeral sessions. */
-export const toDataUrl = (blob) =>
+const toDataUrl = (blob) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
